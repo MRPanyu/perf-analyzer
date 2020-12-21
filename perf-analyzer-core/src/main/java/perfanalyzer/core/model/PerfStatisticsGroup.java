@@ -14,13 +14,13 @@ import java.util.Map;
  */
 public class PerfStatisticsGroup implements Serializable {
 
-	private static final long serialVersionUID = 1768780201223480270L;
+	private static final long serialVersionUID = -6427273552511768812L;
 
 	private long statisticsStartTime;
 	private long statisticsEndTime;
 
 	private List<PerfStatisticsNode> rootNodes = new ArrayList<PerfStatisticsNode>();
-	private Map<String, PerfStatisticsNode> allNodeMap = new HashMap<String, PerfStatisticsNode>();
+	private transient Map<String, PerfStatisticsNode> allNodeMap = new HashMap<String, PerfStatisticsNode>();
 
 	protected PerfStatisticsGroup() {
 	}

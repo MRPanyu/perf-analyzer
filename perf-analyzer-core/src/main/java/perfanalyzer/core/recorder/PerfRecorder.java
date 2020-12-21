@@ -33,7 +33,7 @@ public class PerfRecorder {
 	 */
 	public static void start(String name) {
 		PerfNode parent = nodeStorage.get();
-		PerfNode node = new PerfNode(name, System.currentTimeMillis(), parent);
+		PerfNode node = new PerfNode(name, System.nanoTime(), parent);
 		nodeStorage.set(node);
 	}
 
@@ -42,7 +42,7 @@ public class PerfRecorder {
 	 */
 	public static void end(boolean isError) {
 		final PerfNode node = nodeStorage.get();
-		node.setEndTime(System.currentTimeMillis());
+		node.setEndTimeNano(System.nanoTime());
 		node.setError(isError);
 		PerfNode parent = node.getParent();
 		nodeStorage.set(parent);

@@ -1,11 +1,9 @@
 package perfanalyzer.core.io;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +28,9 @@ public class PerfIOFileImpl implements PerfIO {
 	@Override
 	public void savePerfStatisticsGroup(PerfStatisticsGroup group) {
 		try {
-			ObjectOutputStream out = new AppendingFileObjectOutputStream(file);
+			FileOutputStream out = new FileOutputStream(file, true);
 			try {
-				out.writeObject(group);
+				PerfIOSupport.writePerfStatisticsGroup(out, group);
 			} finally {
 				out.close();
 			}
@@ -45,14 +43,15 @@ public class PerfIOFileImpl implements PerfIO {
 	public List<PerfStatisticsGroup> loadPerfStatisticsGroups() {
 		try {
 			List<PerfStatisticsGroup> list = new ArrayList<PerfStatisticsGroup>();
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+			FileInputStream in = new FileInputStream(file);
 			try {
 				while (true) {
-					PerfStatisticsGroup group = (PerfStatisticsGroup) in.readObject();
+					PerfStatisticsGroup group = PerfIOSupport.readPerfStatisticsGroup(in);
+					if (group == null) {
+						break;
+					}
 					list.add(group);
 				}
-			} catch (EOFException e) {
-				// ignore EOF
 			} finally {
 				in.close();
 			}

@@ -12,15 +12,15 @@ import java.util.List;
  */
 public class PerfNode implements Serializable {
 
-	private static final long serialVersionUID = -4971681436764535036L;
+	private static final long serialVersionUID = -1580462591761505567L;
 
 	public static final String PATH_SEPARATOR = "/";
 
 	private String name;
 	private String path;
 	private boolean error;
-	private long startTime;
-	private long endTime;
+	private long startTimeNano;
+	private long endTimeNano;
 
 	private PerfNode parent;
 	private List<PerfNode> children = new ArrayList<PerfNode>();
@@ -28,9 +28,9 @@ public class PerfNode implements Serializable {
 	protected PerfNode() {
 	}
 
-	public PerfNode(String name, long startTime, PerfNode parent) {
+	public PerfNode(String name, long startTimeNano, PerfNode parent) {
 		this.name = name;
-		this.startTime = startTime;
+		this.startTimeNano = startTimeNano;
 		this.parent = parent;
 		if (parent != null) {
 			parent.children.add(this);
@@ -48,15 +48,15 @@ public class PerfNode implements Serializable {
 		return path;
 	}
 
-	public long getUseTime() {
-		return endTime - startTime;
+	public long getUseTimeNano() {
+		return endTimeNano - startTimeNano;
 	}
 
-	public long getUseTimeExcludeChildren() {
-		long useTime = getUseTime();
+	public long getUseTimeNanoExcludeChildren() {
+		long useTime = getUseTimeNano();
 		long childrenUseTime = 0;
 		for (PerfNode child : children) {
-			childrenUseTime += child.getUseTime();
+			childrenUseTime += child.getUseTimeNano();
 		}
 		return useTime - childrenUseTime;
 	}
@@ -77,20 +77,20 @@ public class PerfNode implements Serializable {
 		this.error = error;
 	}
 
-	public long getStartTime() {
-		return startTime;
+	public long getStartTimeNano() {
+		return startTimeNano;
 	}
 
-	public void setStartTime(long startTime) {
-		this.startTime = startTime;
+	public void setStartTimeNano(long startTimeNano) {
+		this.startTimeNano = startTimeNano;
 	}
 
-	public long getEndTime() {
-		return endTime;
+	public long getEndTimeNano() {
+		return endTimeNano;
 	}
 
-	public void setEndTime(long endTime) {
-		this.endTime = endTime;
+	public void setEndTimeNano(long endTimeNano) {
+		this.endTimeNano = endTimeNano;
 	}
 
 	public PerfNode getParent() {

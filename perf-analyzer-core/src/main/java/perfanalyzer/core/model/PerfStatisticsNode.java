@@ -1,6 +1,8 @@
 package perfanalyzer.core.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,7 @@ import java.util.List;
  */
 public class PerfStatisticsNode implements Serializable {
 
-	private static final long serialVersionUID = 7981067356341733462L;
+	private static final long serialVersionUID = 5654499597403167720L;
 
 	private static long safeDivide(long a, long b) {
 		if (b == 0) {
@@ -25,16 +27,16 @@ public class PerfStatisticsNode implements Serializable {
 	private String path;
 	private long successCount = 0L;
 	private long errorCount = 0L;
-	private long successMaxUseTime = 0L;
-	private long successMaxUseTimeExcludeChildren = 0L;
-	private long errorMaxUseTime = 0L;
-	private long errorMaxUseTimeExcludeChildren = 0L;
-	private long successTotalUseTime = 0L;
-	private long successTotalUseTimeExcludeChildren = 0L;
-	private long errorTotalUseTime = 0L;
-	private long errorTotalUseTimeExcludeChildren = 0L;
+	private long successMaxUseTimeNano = 0L;
+	private long successMaxUseTimeNanoExcludeChildren = 0L;
+	private long errorMaxUseTimeNano = 0L;
+	private long errorMaxUseTimeNanoExcludeChildren = 0L;
+	private long successTotalUseTimeNano = 0L;
+	private long successTotalUseTimeNanoExcludeChildren = 0L;
+	private long errorTotalUseTimeNano = 0L;
+	private long errorTotalUseTimeNanoExcludeChildren = 0L;
 
-	private PerfStatisticsNode parent;
+	private transient PerfStatisticsNode parent;
 	private List<PerfStatisticsNode> children = new ArrayList<PerfStatisticsNode>();
 
 	protected PerfStatisticsNode() {
@@ -50,73 +52,29 @@ public class PerfStatisticsNode implements Serializable {
 	}
 
 	public synchronized void mergeNode(PerfNode node) {
-		long useTime = node.getUseTime();
-		long useTimeExcludeChildren = node.getUseTimeExcludeChildren();
+		long useTimeNano = node.getUseTimeNano();
+		long useTimeNanoExcludeChildren = node.getUseTimeNanoExcludeChildren();
 		if (node.isError()) {
 			this.errorCount++;
-			this.errorTotalUseTime += useTime;
-			this.errorTotalUseTimeExcludeChildren += useTimeExcludeChildren;
-			if (useTime > this.errorMaxUseTime) {
-				this.errorMaxUseTime = useTime;
+			this.errorTotalUseTimeNano += useTimeNano;
+			this.errorTotalUseTimeNanoExcludeChildren += useTimeNanoExcludeChildren;
+			if (useTimeNano > this.errorMaxUseTimeNano) {
+				this.errorMaxUseTimeNano = useTimeNano;
 			}
-			if (useTimeExcludeChildren > this.errorMaxUseTimeExcludeChildren) {
-				this.errorMaxUseTimeExcludeChildren = useTimeExcludeChildren;
+			if (useTimeNanoExcludeChildren > this.errorMaxUseTimeNanoExcludeChildren) {
+				this.errorMaxUseTimeNanoExcludeChildren = useTimeNanoExcludeChildren;
 			}
 		} else {
 			this.successCount++;
-			this.successTotalUseTime += useTime;
-			this.successTotalUseTimeExcludeChildren += useTimeExcludeChildren;
-			if (useTime > this.successMaxUseTime) {
-				this.successMaxUseTime = useTime;
+			this.successTotalUseTimeNano += useTimeNano;
+			this.successTotalUseTimeNanoExcludeChildren += useTimeNanoExcludeChildren;
+			if (useTimeNano > this.successMaxUseTimeNano) {
+				this.successMaxUseTimeNano = useTimeNano;
 			}
-			if (useTimeExcludeChildren > this.successMaxUseTimeExcludeChildren) {
-				this.successMaxUseTimeExcludeChildren = useTimeExcludeChildren;
+			if (useTimeNanoExcludeChildren > this.successMaxUseTimeNanoExcludeChildren) {
+				this.successMaxUseTimeNanoExcludeChildren = useTimeNanoExcludeChildren;
 			}
 		}
-	}
-
-	public long getExecuteCount() {
-		return this.successCount + this.errorCount;
-	}
-
-	public long getMaxUseTime() {
-		return Math.max(this.successMaxUseTime, this.errorMaxUseTime);
-	}
-
-	public long getMaxUseTimeExcludeChildren() {
-		return Math.max(this.successMaxUseTimeExcludeChildren, this.errorMaxUseTimeExcludeChildren);
-	}
-
-	public long getTotalUseTime() {
-		return this.successTotalUseTime + this.errorTotalUseTime;
-	}
-
-	public long getTotalUseTimeExcludeChildren() {
-		return this.successMaxUseTimeExcludeChildren + this.errorTotalUseTimeExcludeChildren;
-	}
-
-	public long getAvgUseTime() {
-		return safeDivide(this.getTotalUseTime(), this.getExecuteCount());
-	}
-
-	public long getAvgUseTimeExcludeChildren() {
-		return safeDivide(this.getTotalUseTimeExcludeChildren(), this.getExecuteCount());
-	}
-
-	public long getSuccessAvgUseTime() {
-		return safeDivide(this.successTotalUseTime, this.successCount);
-	}
-
-	public long getSuccessAvgUseTimeExcludeChildren() {
-		return safeDivide(this.successTotalUseTimeExcludeChildren, this.successCount);
-	}
-
-	public long getErrorAvgUseTime() {
-		return safeDivide(this.errorTotalUseTime, this.errorCount);
-	}
-
-	public long getErrorAvgUseTimeExcludeChildren() {
-		return safeDivide(this.errorTotalUseTimeExcludeChildren, this.errorCount);
 	}
 
 	public String getName() {
@@ -151,68 +109,68 @@ public class PerfStatisticsNode implements Serializable {
 		this.errorCount = errorCount;
 	}
 
-	public long getSuccessMaxUseTime() {
-		return successMaxUseTime;
+	public long getSuccessMaxUseTimeNano() {
+		return successMaxUseTimeNano;
 	}
 
-	public void setSuccessMaxUseTime(long successMaxUseTime) {
-		this.successMaxUseTime = successMaxUseTime;
+	public void setSuccessMaxUseTimeNano(long successMaxUseTimeNano) {
+		this.successMaxUseTimeNano = successMaxUseTimeNano;
 	}
 
-	public long getSuccessMaxUseTimeExcludeChildren() {
-		return successMaxUseTimeExcludeChildren;
+	public long getSuccessMaxUseTimeNanoExcludeChildren() {
+		return successMaxUseTimeNanoExcludeChildren;
 	}
 
-	public void setSuccessMaxUseTimeExcludeChildren(long successMaxUseTimeExcludeChildren) {
-		this.successMaxUseTimeExcludeChildren = successMaxUseTimeExcludeChildren;
+	public void setSuccessMaxUseTimeNanoExcludeChildren(long successMaxUseTimeNanoExcludeChildren) {
+		this.successMaxUseTimeNanoExcludeChildren = successMaxUseTimeNanoExcludeChildren;
 	}
 
-	public long getErrorMaxUseTime() {
-		return errorMaxUseTime;
+	public long getErrorMaxUseTimeNano() {
+		return errorMaxUseTimeNano;
 	}
 
-	public void setErrorMaxUseTime(long errorMaxUseTime) {
-		this.errorMaxUseTime = errorMaxUseTime;
+	public void setErrorMaxUseTimeNano(long errorMaxUseTimeNano) {
+		this.errorMaxUseTimeNano = errorMaxUseTimeNano;
 	}
 
-	public long getErrorMaxUseTimeExcludeChildren() {
-		return errorMaxUseTimeExcludeChildren;
+	public long getErrorMaxUseTimeNanoExcludeChildren() {
+		return errorMaxUseTimeNanoExcludeChildren;
 	}
 
-	public void setErrorMaxUseTimeExcludeChildren(long errorMaxUseTimeExcludeChildren) {
-		this.errorMaxUseTimeExcludeChildren = errorMaxUseTimeExcludeChildren;
+	public void setErrorMaxUseTimeNanoExcludeChildren(long errorMaxUseTimeNanoExcludeChildren) {
+		this.errorMaxUseTimeNanoExcludeChildren = errorMaxUseTimeNanoExcludeChildren;
 	}
 
-	public long getSuccessTotalUseTime() {
-		return successTotalUseTime;
+	public long getSuccessTotalUseTimeNano() {
+		return successTotalUseTimeNano;
 	}
 
-	public void setSuccessTotalUseTime(long successTotalUseTime) {
-		this.successTotalUseTime = successTotalUseTime;
+	public void setSuccessTotalUseTimeNano(long successTotalUseTimeNano) {
+		this.successTotalUseTimeNano = successTotalUseTimeNano;
 	}
 
-	public long getSuccessTotalUseTimeExcludeChildren() {
-		return successTotalUseTimeExcludeChildren;
+	public long getSuccessTotalUseTimeNanoExcludeChildren() {
+		return successTotalUseTimeNanoExcludeChildren;
 	}
 
-	public void setSuccessTotalUseTimeExcludeChildren(long successTotalUseTimeExcludeChildren) {
-		this.successTotalUseTimeExcludeChildren = successTotalUseTimeExcludeChildren;
+	public void setSuccessTotalUseTimeNanoExcludeChildren(long successTotalUseTimeNanoExcludeChildren) {
+		this.successTotalUseTimeNanoExcludeChildren = successTotalUseTimeNanoExcludeChildren;
 	}
 
-	public long getErrorTotalUseTime() {
-		return errorTotalUseTime;
+	public long getErrorTotalUseTimeNano() {
+		return errorTotalUseTimeNano;
 	}
 
-	public void setErrorTotalUseTime(long errorTotalUseTime) {
-		this.errorTotalUseTime = errorTotalUseTime;
+	public void setErrorTotalUseTimeNano(long errorTotalUseTimeNano) {
+		this.errorTotalUseTimeNano = errorTotalUseTimeNano;
 	}
 
-	public long getErrorTotalUseTimeExcludeChildren() {
-		return errorTotalUseTimeExcludeChildren;
+	public long getErrorTotalUseTimeNanoExcludeChildren() {
+		return errorTotalUseTimeNanoExcludeChildren;
 	}
 
-	public void setErrorTotalUseTimeExcludeChildren(long errorTotalUseTimeExcludeChildren) {
-		this.errorTotalUseTimeExcludeChildren = errorTotalUseTimeExcludeChildren;
+	public void setErrorTotalUseTimeNanoExcludeChildren(long errorTotalUseTimeNanoExcludeChildren) {
+		this.errorTotalUseTimeNanoExcludeChildren = errorTotalUseTimeNanoExcludeChildren;
 	}
 
 	public PerfStatisticsNode getParent() {
@@ -229,6 +187,128 @@ public class PerfStatisticsNode implements Serializable {
 
 	public void setChildren(List<PerfStatisticsNode> children) {
 		this.children = children;
+	}
+
+	public long getExecuteCount() {
+		return this.successCount + this.errorCount;
+	}
+
+	public long getMaxUseTimeNano() {
+		return Math.max(this.successMaxUseTimeNano, this.errorMaxUseTimeNano);
+	}
+
+	public long getMaxUseTimeNanoExcludeChildren() {
+		return Math.max(this.successMaxUseTimeNanoExcludeChildren, this.errorMaxUseTimeNanoExcludeChildren);
+	}
+
+	public long getTotalUseTimeNano() {
+		return this.successTotalUseTimeNano + this.errorTotalUseTimeNano;
+	}
+
+	public long getTotalUseTimeNanoExcludeChildren() {
+		return this.successTotalUseTimeNanoExcludeChildren + this.errorTotalUseTimeNanoExcludeChildren;
+	}
+
+	public long getAvgUseTimeNano() {
+		return safeDivide(this.getTotalUseTimeNano(), this.getExecuteCount());
+	}
+
+	public long getAvgUseTimeNanoExcludeChildren() {
+		return safeDivide(this.getTotalUseTimeNanoExcludeChildren(), this.getExecuteCount());
+	}
+
+	public long getSuccessAvgUseTimeNano() {
+		return safeDivide(this.successTotalUseTimeNano, this.successCount);
+	}
+
+	public long getSuccessAvgUseTimeNanoExcludeChildren() {
+		return safeDivide(this.successTotalUseTimeNanoExcludeChildren, this.successCount);
+	}
+
+	public long getErrorAvgUseTimeNano() {
+		return safeDivide(this.errorTotalUseTimeNano, this.errorCount);
+	}
+
+	public long getErrorAvgUseTimeNanoExcludeChildren() {
+		return safeDivide(this.errorTotalUseTimeNanoExcludeChildren, this.errorCount);
+	}
+
+	public String getSuccessMaxUseTime() {
+		return nanoToMillis(getSuccessMaxUseTimeNano());
+	}
+
+	public String getSuccessMaxUseTimeExcludeChildren() {
+		return nanoToMillis(getSuccessMaxUseTimeNanoExcludeChildren());
+	}
+
+	public String getErrorMaxUseTime() {
+		return nanoToMillis(getErrorMaxUseTimeNano());
+	}
+
+	public String getErrorMaxUseTimeExcludeChildren() {
+		return nanoToMillis(getErrorMaxUseTimeNanoExcludeChildren());
+	}
+
+	public String getSuccessTotalUseTime() {
+		return nanoToMillis(getSuccessTotalUseTimeNano());
+	}
+
+	public String getSuccessTotalUseTimeExcludeChildren() {
+		return nanoToMillis(getSuccessTotalUseTimeNanoExcludeChildren());
+	}
+
+	public String getErrorTotalUseTime() {
+		return nanoToMillis(getErrorTotalUseTimeNano());
+	}
+
+	public String getErrorTotalUseTimeExcludeChildren() {
+		return nanoToMillis(getErrorTotalUseTimeNanoExcludeChildren());
+	}
+
+	public String getMaxUseTime() {
+		return nanoToMillis(getMaxUseTimeNano());
+	}
+
+	public String getMaxUseTimeExcludeChildren() {
+		return nanoToMillis(getMaxUseTimeNanoExcludeChildren());
+	}
+
+	public String getTotalUseTime() {
+		return nanoToMillis(getTotalUseTimeNano());
+	}
+
+	public String getTotalUseTimeExcludeChildren() {
+		return nanoToMillis(getTotalUseTimeNanoExcludeChildren());
+	}
+
+	public String getAvgUseTime() {
+		return nanoToMillis(getAvgUseTimeNano());
+	}
+
+	public String getAvgUseTimeExcludeChildren() {
+		return nanoToMillis(getAvgUseTimeNanoExcludeChildren());
+	}
+
+	public String getSuccessAvgUseTime() {
+		return nanoToMillis(getSuccessAvgUseTimeNano());
+	}
+
+	public String getSuccessAvgUseTimeExcludeChildren() {
+		return nanoToMillis(getSuccessAvgUseTimeNanoExcludeChildren());
+	}
+
+	public String getErrorAvgUseTime() {
+		return nanoToMillis(getErrorAvgUseTimeNano());
+	}
+
+	public String getErrorAvgUseTimeExcludeChildren() {
+		return nanoToMillis(getErrorAvgUseTimeNanoExcludeChildren());
+	}
+
+	/** 纳秒转换为毫秒显示 */
+	private String nanoToMillis(long nano) {
+		BigDecimal n = BigDecimal.valueOf(nano).divide(BigDecimal.valueOf(1000000), 2, RoundingMode.HALF_UP);
+		return n.toPlainString();
 	}
 
 }
