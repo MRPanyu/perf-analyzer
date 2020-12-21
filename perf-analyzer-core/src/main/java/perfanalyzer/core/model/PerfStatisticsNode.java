@@ -14,6 +14,13 @@ public class PerfStatisticsNode implements Serializable {
 
 	private static final long serialVersionUID = 7981067356341733462L;
 
+	private static long safeDivide(long a, long b) {
+		if (b == 0) {
+			return 0;
+		}
+		return a / b;
+	}
+
 	private String name;
 	private String path;
 	private long successCount = 0L;
@@ -89,27 +96,27 @@ public class PerfStatisticsNode implements Serializable {
 	}
 
 	public long getAvgUseTime() {
-		return this.getTotalUseTime() / this.getExecuteCount();
+		return safeDivide(this.getTotalUseTime(), this.getExecuteCount());
 	}
 
 	public long getAvgUseTimeExcludeChildren() {
-		return this.getTotalUseTimeExcludeChildren() / this.getExecuteCount();
+		return safeDivide(this.getTotalUseTimeExcludeChildren(), this.getExecuteCount());
 	}
 
 	public long getSuccessAvgUseTime() {
-		return this.successTotalUseTime / this.successCount;
+		return safeDivide(this.successTotalUseTime, this.successCount);
 	}
 
 	public long getSuccessAvgUseTimeExcludeChildren() {
-		return this.successTotalUseTimeExcludeChildren / this.successCount;
+		return safeDivide(this.successTotalUseTimeExcludeChildren, this.successCount);
 	}
 
 	public long getErrorAvgUseTime() {
-		return this.errorTotalUseTime / this.errorCount;
+		return safeDivide(this.errorTotalUseTime, this.errorCount);
 	}
 
 	public long getErrorAvgUseTimeExcludeChildren() {
-		return this.errorTotalUseTimeExcludeChildren / this.errorCount;
+		return safeDivide(this.errorTotalUseTimeExcludeChildren, this.errorCount);
 	}
 
 	public String getName() {
