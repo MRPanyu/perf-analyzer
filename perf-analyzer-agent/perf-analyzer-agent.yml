@@ -1,0 +1,16 @@
+# 输出性能数据的文件
+outputFile: "./perf_record.prec"
+
+# 拦截切面，可配置多个
+aspects:
+    # 包含的类名，可用*通配符，可多个分号隔开
+    # 类名中的通配符：一个*匹配单层包名或类名，两个**通配符则包含子包。
+    # 例：com.example.* 表示 com.example 单个包下的所有类
+    # 例：com.example.** 表示 com.example 包以及所有子包下的所有类
+  - includeClasses: "com.example.**"
+    # 排除的类名，可用*通配，可多个分号隔开
+    excludeClasses: "com.example.**po.*;com.example.**vo.*"
+    # 包含的方法名，可用*通配，可多个分号隔开
+    includeMethods: "*"
+    # 排除的方法名，可用*通配，可多个分号隔开
+    excludeMethods: "hashCode;equals"

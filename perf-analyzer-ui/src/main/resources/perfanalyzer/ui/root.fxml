@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane fx:id="root" fx:controller="perfanalyzer.ui.RootController" xmlns:fx="http://javafx.com/fxml"
+	alignment="center" hgap="0" vgap="0">
+
+	<padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+	<columnConstraints>
+		<ColumnConstraints prefWidth="200"></ColumnConstraints>
+		<ColumnConstraints hgrow="ALWAYS"></ColumnConstraints>
+	</columnConstraints>
+	<rowConstraints>
+		<RowConstraints></RowConstraints>
+		<RowConstraints vgrow="ALWAYS"></RowConstraints>
+	</rowConstraints>
+
+	<ToolBar GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+		<Button onAction="#onOpen">Open</Button>
+	</ToolBar>
+	
+	<ListView fx:id="groupsList" GridPane.columnIndex="0" GridPane.rowIndex="1">
+	
+	</ListView>
+	
+	<TreeTableView fx:id="dataTreeTable" GridPane.columnIndex="1" GridPane.rowIndex="1">
+		<columns>
+			<TreeTableColumn text="Name" prefWidth="300"></TreeTableColumn>
+			<TreeTableColumn text="Success Count"></TreeTableColumn>
+			<TreeTableColumn text="Error Count"></TreeTableColumn>
+		</columns>
+	</TreeTableView>
+
+</GridPane>
