@@ -10,13 +10,18 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import perfanalyzer.core.io.PerfIOFileImpl;
 import perfanalyzer.core.model.PerfStatisticsGroup;
 import perfanalyzer.core.model.PerfStatisticsNode;
@@ -29,6 +34,8 @@ public class RootController {
 	protected ListView<String> listViewGroups;
 	@FXML
 	protected TreeTableView<PerfStatisticsNode> treeTableNodes;
+	@FXML
+	protected TreeTableColumn<PerfStatisticsNode, Object> treeTableColumnName;
 
 	protected File file;
 
@@ -38,12 +45,44 @@ public class RootController {
 
 	@FXML
 	public void initialize() {
+		// 左侧列表选择事件
 		listViewGroups.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				onGroupSelectionChange(newValue);
 			}
 		});
+		// treeTableNodes添加tooltip效果
+		for (TreeTableColumn<PerfStatisticsNode, ?> column : treeTableNodes.getColumns()) {
+			String text = column.getText();
+			Label label = new Label(text);
+			label.setTooltip(new Tooltip(text));
+			column.setText("");
+			column.setGraphic(label);
+		}
+		// name列添加tooltip效果
+		treeTableColumnName.setCellFactory(
+				new Callback<TreeTableColumn<PerfStatisticsNode, Object>, TreeTableCell<PerfStatisticsNode, Object>>() {
+					@Override
+					public TreeTableCell<PerfStatisticsNode, Object> call(
+							TreeTableColumn<PerfStatisticsNode, Object> p) {
+						return new TreeTableCell<PerfStatisticsNode, Object>() {
+							@Override
+							public void updateItem(Object t, boolean empty) {
+								super.updateItem(t, empty);
+								if (t == null) {
+									setTooltip(null);
+									setText(null);
+								} else {
+									Tooltip tooltip = new Tooltip();
+									tooltip.setText(t.toString());
+									setTooltip(tooltip);
+									setText(t.toString());
+								}
+							}
+						};
+					}
+				});
 	}
 
 	@FXML

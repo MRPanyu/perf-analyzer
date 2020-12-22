@@ -29,7 +29,7 @@
 	
 	<TreeTableView fx:id="treeTableNodes" GridPane.columnIndex="1" GridPane.rowIndex="1" showRoot="false">
 		<columns>
-			<TreeTableColumn text="方法名" prefWidth="300">
+			<TreeTableColumn fx:id="treeTableColumnName" text="方法名" prefWidth="500">
 				<cellValueFactory>
 					<TreeItemPropertyValueFactory property="name" />
 				</cellValueFactory>

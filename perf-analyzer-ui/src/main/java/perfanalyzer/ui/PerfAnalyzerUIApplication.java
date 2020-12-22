@@ -4,12 +4,13 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class PerfAnalyzerUIApplication extends Application {
 
 	public static final String DEFAULT_TITLE = "PerfAnalyzerUI";
-	
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		Parent root = FXMLLoader.load(getClass().getResource("root.fxml"));
@@ -18,6 +19,8 @@ public class PerfAnalyzerUIApplication extends Application {
 
 		primaryStage.setTitle(DEFAULT_TITLE);
 		primaryStage.setScene(scene);
+		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("analyze.png")));
+		primaryStage.setMaximized(true);
 		primaryStage.show();
 	}
 
