@@ -18,6 +18,7 @@ public class PerfAgentAspectConfigTest {
 		assertFalse(cfg.matchClass("com.example.FooModelBar"));
 		assertFalse(cfg.matchClass("com.example.Model01"));
 		assertFalse(cfg.matchClass("com.example.service.FooService"));
+		assertFalse(cfg.matchClass("org.springframework.Test"));
 		
 		cfg = new PerfAgentAspectConfig();
 		cfg.setIncludeClasses("com.example.**;com.example2.**");

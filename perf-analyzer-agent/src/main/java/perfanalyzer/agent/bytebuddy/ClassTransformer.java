@@ -1,6 +1,7 @@
 package perfanalyzer.agent.bytebuddy;
 
 import static net.bytebuddy.matcher.ElementMatchers.isAbstract;
+import static net.bytebuddy.matcher.ElementMatchers.isDefaultMethod;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
@@ -25,7 +26,8 @@ public class ClassTransformer implements Transformer {
 	@Override
 	public Builder<?> transform(Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader,
 			JavaModule module) {
-		return builder.method(new NameMatcher<NamedElement>(methodNameMatcher).and(not(isAbstract())))
+		return builder.method(
+				new NameMatcher<NamedElement>(methodNameMatcher).and(not(isAbstract())).and(not(isDefaultMethod())))
 				.intercept(MethodDelegation.to(PerfRecordDelegation.class));
 	}
 }

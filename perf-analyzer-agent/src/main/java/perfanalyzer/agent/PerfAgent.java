@@ -7,6 +7,7 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
+import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.matcher.NameMatcher;
 import perfanalyzer.agent.bytebuddy.ClassNameMatcher;
 import perfanalyzer.agent.bytebuddy.ClassTransformer;
@@ -32,7 +33,8 @@ public class PerfAgent {
 		// 根据逐个切面配置设置增强的类与方法
 		for (PerfAgentAspectConfig aspectConfig : config.getAspects()) {
 			ClassNameMatcher classNameMatcher = new ClassNameMatcher(aspectConfig);
-			agentBuilder = agentBuilder.type(new NameMatcher<NamedElement>(classNameMatcher))
+			NameMatcher<NamedElement> nameMatcher = new NameMatcher<NamedElement>(classNameMatcher);
+			agentBuilder = agentBuilder.type(nameMatcher.or(ElementMatchers.hasSuperType(nameMatcher)))
 					.transform(new ClassTransformer(aspectConfig));
 		}
 
