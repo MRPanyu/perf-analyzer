@@ -16,6 +16,12 @@ import perfanalyzer.agent.config.PerfAgentConfig;
 import perfanalyzer.core.io.PerfIOFileImpl;
 import perfanalyzer.core.recorder.PerfRecorder;
 
+/**
+ * 性能记录agent的premain类
+ * 
+ * @author panyu
+ *
+ */
 public class PerfAgent {
 
 	public static void premain(String options, Instrumentation inst) {

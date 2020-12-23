@@ -3,9 +3,10 @@ package perfanalyzer.agent.bytebuddy;
 import net.bytebuddy.matcher.ElementMatcher;
 import perfanalyzer.agent.config.PerfAgentAspectConfig;
 
+/** 根据配置信息匹配方法名 */
 public class MethodNameMatcher implements ElementMatcher<String> {
 
-	private PerfAgentAspectConfig aspectConfig;
+	protected PerfAgentAspectConfig aspectConfig;
 
 	public MethodNameMatcher(PerfAgentAspectConfig aspectConfig) {
 		this.aspectConfig = aspectConfig;

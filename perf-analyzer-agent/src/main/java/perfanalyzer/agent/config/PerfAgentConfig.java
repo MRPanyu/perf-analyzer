@@ -1,7 +1,5 @@
 package perfanalyzer.agent.config;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
@@ -11,12 +9,19 @@ import java.util.List;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+/**
+ * 性能记录agent的yml配置类
+ * 
+ * @author panyu
+ *
+ */
 public class PerfAgentConfig implements Serializable {
 
 	private static final long serialVersionUID = -8050616338891821147L;
 
 	private static PerfAgentConfig instance = null;
 
+	/** 加载配置信息 */
 	public synchronized static PerfAgentConfig getInstance() {
 		if (instance == null) {
 			/* 从perf-analyzer-agent.jar文件同目录下的perf-analyzer-agent.yml文件加载配置 */
@@ -39,7 +44,9 @@ public class PerfAgentConfig implements Serializable {
 		return instance;
 	}
 
+	/** 输出性能数据的文件，注意如果是相对路径格式，相对的是程序启动的路径而不是agent jar包的路径 */
 	private String outputFile;
+	/** 拦截进行性能记录的切面 */
 	private List<PerfAgentAspectConfig> aspects = new ArrayList<PerfAgentAspectConfig>();
 
 	public String getOutputFile() {

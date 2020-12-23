@@ -26,6 +26,12 @@ import perfanalyzer.core.io.PerfIOFileImpl;
 import perfanalyzer.core.model.PerfStatisticsGroup;
 import perfanalyzer.core.model.PerfStatisticsNode;
 
+/**
+ * 主界面对应的Controller
+ * 
+ * @author panyu
+ *
+ */
 public class RootController {
 
 	@FXML
@@ -85,13 +91,14 @@ public class RootController {
 				});
 	}
 
+	/** 打开文件事件 */
 	@FXML
 	public void onOpen(ActionEvent event) {
 		Stage stage = (Stage) root.getScene().getWindow();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Resource File");
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Perf Analyzer Record Data", "*.prec"),
-				new ExtensionFilter("All Files", "*.*"));
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("性能记录文件", "*.prec"),
+				new ExtensionFilter("所有文件", "*.*"));
 		file = fileChooser.showOpenDialog(stage);
 		try {
 			if (file != null) {
@@ -117,6 +124,7 @@ public class RootController {
 		listViewGroups.getItems().setAll(items);
 	}
 
+	/** 左侧列表选择某个统计信息组事件 */
 	public void onGroupSelectionChange(String value) {
 		try {
 			if (value == null) {

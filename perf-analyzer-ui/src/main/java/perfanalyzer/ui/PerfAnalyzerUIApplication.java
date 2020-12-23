@@ -7,6 +7,12 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+/**
+ * 性能分析UI程序主应用类
+ * 
+ * @author panyu
+ *
+ */
 public class PerfAnalyzerUIApplication extends Application {
 
 	public static final String DEFAULT_TITLE = "PerfAnalyzerUI";

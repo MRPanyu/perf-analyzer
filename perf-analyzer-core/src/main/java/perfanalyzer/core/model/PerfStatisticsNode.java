@@ -23,20 +23,34 @@ public class PerfStatisticsNode implements Serializable {
 		return a / b;
 	}
 
+	/** 代码块标识名称，对应{@link PerfNode#name} */
 	private String name;
+	/** 代码块完整路径，对应{@link PerfNode#path} */
 	private String path;
+	/** 执行成功的次数 */
 	private long successCount = 0L;
+	/** 执行错误/异常的次数 */
 	private long errorCount = 0L;
+	/** 执行成功的单次最大耗时纳秒数 */
 	private long successMaxUseTimeNano = 0L;
+	/** 执行成功的单次最大除子节点外的耗时纳秒数 */
 	private long successMaxUseTimeNanoExcludeChildren = 0L;
+	/** 执行错误/异常的单次最大耗时纳秒数 */
 	private long errorMaxUseTimeNano = 0L;
+	/** 执行错误/异常的单次最大除子节点外的耗时纳秒数 */
 	private long errorMaxUseTimeNanoExcludeChildren = 0L;
+	/** 执行成功的总耗时纳秒数 */
 	private long successTotalUseTimeNano = 0L;
+	/** 执行成功的除子节点外总耗时纳秒数 */
 	private long successTotalUseTimeNanoExcludeChildren = 0L;
+	/** 执行错误/异常的总耗时纳秒数 */
 	private long errorTotalUseTimeNano = 0L;
+	/** 执行错误/异常的除子节点外总耗时纳秒数 */
 	private long errorTotalUseTimeNanoExcludeChildren = 0L;
 
+	/** 统计信息的父节点 */
 	private transient PerfStatisticsNode parent;
+	/** 统计信息的子节点 */
 	private List<PerfStatisticsNode> children = new ArrayList<PerfStatisticsNode>();
 
 	protected PerfStatisticsNode() {
@@ -51,6 +65,7 @@ public class PerfStatisticsNode implements Serializable {
 		}
 	}
 
+	/** 将单次执行结果汇总到本次统计信息中，次数+1，执行时间累加，最大执行时间取最大值等 */
 	public synchronized void mergeNode(PerfNode node) {
 		long useTimeNano = node.getUseTimeNano();
 		long useTimeNanoExcludeChildren = node.getUseTimeNanoExcludeChildren();
