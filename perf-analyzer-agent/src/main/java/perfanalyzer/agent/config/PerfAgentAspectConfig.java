@@ -59,15 +59,22 @@ public class PerfAgentAspectConfig implements Serializable {
 				break;
 			}
 		}
-		if (match) {
-			for (Pattern p : excludeClassPatterns) {
-				if (p.matcher(className).matches()) {
-					match = false;
-					break;
-				}
-			}
+		if (match && isExcludeClass(className)) {
+			match = false;
 		}
 		return match;
+	}
+
+	/** 判断类名是否属于需排除 */
+	public boolean isExcludeClass(String className) {
+		boolean isExclude = false;
+		for (Pattern p : excludeClassPatterns) {
+			if (p.matcher(className).matches()) {
+				isExclude = true;
+				break;
+			}
+		}
+		return isExclude;
 	}
 
 	/** 判断方法名是否匹配 */
@@ -118,8 +125,8 @@ public class PerfAgentAspectConfig implements Serializable {
 		for (String s : arr) {
 			s = s.trim();
 			if (s.length() > 0) {
-				// 点(.)匹配文本的点，单个星号(*)匹配除了点以外的字符，两个星号(**)匹配任意字符
-				s = s.replace(".", "\\.").replace("*", "[^.]*").replace("[^.]*[^.]*", ".*");
+				// $匹配文本$，点(.)匹配文本的点，单个星号(*)匹配除了点以外的字符，两个星号(**)匹配任意字符
+				s = s.replace("$", "\\$").replace(".", "\\.").replace("*", "[^.]*").replace("[^.]*[^.]*", ".*");
 				Pattern p = Pattern.compile(s);
 				patterns.add(p);
 			}

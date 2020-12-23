@@ -22,7 +22,7 @@ public class PerfAgentAspectConfigTest {
 		
 		cfg = new PerfAgentAspectConfig();
 		cfg.setIncludeClasses("com.example.**;com.example2.**");
-		cfg.setExcludeClasses("com.example.**Model*");
+		cfg.setExcludeClasses("com.example.**Model*;com.example.**service.**$$**");
 		assertTrue(cfg.matchClass("com.example.FooService"));
 		assertTrue(cfg.matchClass("com.example2.FooService"));
 		assertFalse(cfg.matchClass("com.example.FooModel"));

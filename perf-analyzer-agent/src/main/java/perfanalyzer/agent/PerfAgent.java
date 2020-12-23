@@ -1,5 +1,8 @@
 package perfanalyzer.agent;
 
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static net.bytebuddy.matcher.ElementMatchers.not;
+
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 
@@ -7,10 +10,10 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
-import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.matcher.NameMatcher;
 import perfanalyzer.agent.bytebuddy.ClassNameMatcher;
 import perfanalyzer.agent.bytebuddy.ClassTransformer;
+import perfanalyzer.agent.bytebuddy.ExcludeClassNameMatcher;
 import perfanalyzer.agent.config.PerfAgentAspectConfig;
 import perfanalyzer.agent.config.PerfAgentConfig;
 import perfanalyzer.core.io.PerfIOFileImpl;
@@ -39,8 +42,12 @@ public class PerfAgent {
 		// 根据逐个切面配置设置增强的类与方法
 		for (PerfAgentAspectConfig aspectConfig : config.getAspects()) {
 			ClassNameMatcher classNameMatcher = new ClassNameMatcher(aspectConfig);
+			ExcludeClassNameMatcher excludeClassNameMatcher = new ExcludeClassNameMatcher(aspectConfig);
 			NameMatcher<NamedElement> nameMatcher = new NameMatcher<NamedElement>(classNameMatcher);
-			agentBuilder = agentBuilder.type(nameMatcher.or(ElementMatchers.hasSuperType(nameMatcher)))
+			NameMatcher<NamedElement> excludeNameMatcher = new NameMatcher<NamedElement>(excludeClassNameMatcher);
+			// 类名的匹配规则：类名本身符合匹配规则的，或者某个类有父类或实现接口是符合匹配规则的，且这个类名本身不属于排除列表的
+			// 后面那种匹配情况主要是想拦截到一些如MyBatis/spring-data之类自动生成的DAO动态实现类
+			agentBuilder = agentBuilder.type(nameMatcher.or(hasSuperType(nameMatcher).and(not(excludeNameMatcher))))
 					.transform(new ClassTransformer(aspectConfig));
 		}
 
