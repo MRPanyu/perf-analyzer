@@ -10,6 +10,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
@@ -96,13 +99,12 @@ public class RootController {
 	public void onOpen(ActionEvent event) {
 		Stage stage = (Stage) root.getScene().getWindow();
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Resource File");
+		fileChooser.setTitle("打开文件");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("性能记录文件", "*.prec"),
 				new ExtensionFilter("所有文件", "*.*"));
 		file = fileChooser.showOpenDialog(stage);
 		try {
 			if (file != null) {
-				stage.setTitle(PerfAnalyzerUIApplication.DEFAULT_TITLE + " - " + file.getCanonicalPath());
 				loadData(file);
 			}
 		} catch (Exception e) {
@@ -111,9 +113,16 @@ public class RootController {
 	}
 
 	public void loadData(File file) throws Exception {
+		Stage stage = (Stage) root.getScene().getWindow();
 		PerfIOFileImpl perfIO = new PerfIOFileImpl(file);
 		groups = perfIO.loadPerfStatisticsGroups();
-		renderListViewGroups();
+		if (groups != null && !groups.isEmpty()) {
+			stage.setTitle(PerfAnalyzerUIApplication.DEFAULT_TITLE + " - " + file.getCanonicalPath());
+			renderListViewGroups();
+		} else {
+			Alert alert = new Alert(AlertType.ERROR, "文件格式不正确或文件已损坏");
+			alert.showAndWait();
+		}
 	}
 
 	private void renderListViewGroups() throws Exception {
