@@ -1,17 +1,20 @@
 package perfanalyzer.ui;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -28,6 +31,7 @@ import javafx.util.Callback;
 import perfanalyzer.core.io.PerfIOFileImpl;
 import perfanalyzer.core.model.PerfStatisticsGroup;
 import perfanalyzer.core.model.PerfStatisticsNode;
+import perfanalyzer.ui.export.ExcelExporter;
 
 /**
  * 主界面对应的Controller
@@ -100,8 +104,8 @@ public class RootController {
 		Stage stage = (Stage) root.getScene().getWindow();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("打开文件");
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("性能记录文件", "*.prec"),
-				new ExtensionFilter("所有文件", "*.*"));
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("性能记录文件(*.prec)", "*.prec"),
+				new ExtensionFilter("所有文件(*.*)", "*.*"));
 		file = fileChooser.showOpenDialog(stage);
 		try {
 			if (file != null) {
@@ -109,6 +113,68 @@ public class RootController {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	/** 导出Excel(所选)事件 */
+	@FXML
+	public void onExportSelected(ActionEvent event) {
+		Stage stage = (Stage) root.getScene().getWindow();
+		if (groups == null) {
+			showAlert(AlertType.WARNING, "请先打开性能分析文件");
+			return;
+		}
+		if (selectedGroup == null) {
+			showAlert(AlertType.WARNING, "请先选择某一分钟的记录");
+			return;
+		}
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("导出Excel文件");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Excel文件(*.xlsx)", "*.xlsx"),
+				new ExtensionFilter("所有文件(*.*)", "*.*"));
+		file = fileChooser.showSaveDialog(stage);
+		try {
+			if (file != null) {
+				try (Workbook wb = new XSSFWorkbook(); FileOutputStream fout = new FileOutputStream(file)) {
+					ExcelExporter exporter = new ExcelExporter();
+					exporter.exportSheet(wb, selectedGroup);
+					wb.write(new FileOutputStream(file));
+				}
+				showAlert(AlertType.INFORMATION, "导出完成");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			showAlert(AlertType.ERROR, "导出异常：" + e.getClass().getName() + ": " + e.getMessage());
+		}
+	}
+
+	/** 导出Excel(全部)事件 */
+	@FXML
+	public void onExportAll(ActionEvent event) {
+		Stage stage = (Stage) root.getScene().getWindow();
+		if (groups == null) {
+			showAlert(AlertType.WARNING, "请先打开性能分析文件");
+			return;
+		}
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("导出Excel文件");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Excel文件(*.xlsx)", "*.xlsx"),
+				new ExtensionFilter("所有文件(*.*)", "*.*"));
+		file = fileChooser.showSaveDialog(stage);
+		try {
+			if (file != null) {
+				try (Workbook wb = new XSSFWorkbook(); FileOutputStream fout = new FileOutputStream(file)) {
+					ExcelExporter exporter = new ExcelExporter();
+					for (PerfStatisticsGroup group : groups) {
+						exporter.exportSheet(wb, group);
+					}
+					wb.write(new FileOutputStream(file));
+				}
+				showAlert(AlertType.INFORMATION, "导出完成");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			showAlert(AlertType.ERROR, "导出异常：" + e.getClass().getName() + ": " + e.getMessage());
 		}
 	}
 
@@ -120,8 +186,7 @@ public class RootController {
 			stage.setTitle(PerfAnalyzerUIApplication.DEFAULT_TITLE + " - " + file.getCanonicalPath());
 			renderListViewGroups();
 		} else {
-			Alert alert = new Alert(AlertType.ERROR, "文件格式不正确或文件已损坏");
-			alert.showAndWait();
+			showAlert(AlertType.ERROR, "文件格式不正确或文件已损坏");
 		}
 	}
 
@@ -173,6 +238,13 @@ public class RootController {
 		for (PerfStatisticsNode child : node.getChildren()) {
 			buildTree(item, child);
 		}
+	}
+
+	private void showAlert(AlertType type, String message) {
+		Stage stage = (Stage) root.getScene().getWindow();
+		Alert alert = new Alert(type, message);
+		alert.initOwner(stage);
+		alert.showAndWait();
 	}
 
 }

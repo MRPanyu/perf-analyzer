@@ -11,13 +11,14 @@
 	<parent>
 		<groupId>perf-analyzer</groupId>
 		<artifactId>perf-analyzer-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<properties>
 		<java.version>1.8</java.version>
 		<javafx.version>11.0.2</javafx.version>
+		<poi.version>4.1.2</poi.version>
 	</properties>
 
 	<dependencies>
@@ -26,6 +27,19 @@
 			<artifactId>perf-analyzer-core</artifactId>
 		</dependency>
 
+		<!-- apache poi for excel -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+
+		<!-- javafx -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
