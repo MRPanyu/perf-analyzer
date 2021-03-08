@@ -223,7 +223,7 @@ public class RootController {
 		if (selectedGroup == null) {
 			treeTableNodes.setRoot(null);
 		} else {
-			PerfStatisticsNode root = new PerfStatisticsNode("root", "root", null);
+			PerfStatisticsNode root = new PerfStatisticsNode("root", "root");
 			TreeItem<PerfStatisticsNode> rootItem = new TreeItem<PerfStatisticsNode>(root);
 			for (PerfStatisticsNode node : selectedGroup.getRootNodes()) {
 				buildTree(rootItem, node);

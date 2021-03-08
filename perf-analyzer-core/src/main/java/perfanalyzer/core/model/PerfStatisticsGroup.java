@@ -45,9 +45,11 @@ public class PerfStatisticsGroup implements Serializable {
 					if (parentPath != null) {
 						parent = allNodeMap.get(parentPath);
 					}
-					node = new PerfStatisticsNode(name, parentPath, parent);
+					node = new PerfStatisticsNode(name, parentPath);
 					if (parent == null) {
 						rootNodes.add(node);
+					} else {
+						parent.getChildren().add(node);
 					}
 					allNodeMap.put(path, node);
 				}

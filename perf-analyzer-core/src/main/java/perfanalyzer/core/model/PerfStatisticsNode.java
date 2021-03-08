@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class PerfStatisticsNode implements Serializable {
 
-	private static final long serialVersionUID = 5654499597403167720L;
+	private static final long serialVersionUID = -7876077102960270051L;
 
 	private static long safeDivide(long a, long b) {
 		if (b == 0) {
@@ -48,21 +48,15 @@ public class PerfStatisticsNode implements Serializable {
 	/** 执行错误/异常的除子节点外总耗时纳秒数 */
 	private long errorTotalUseTimeNanoExcludeChildren = 0L;
 
-	/** 统计信息的父节点 */
-	private transient PerfStatisticsNode parent;
 	/** 统计信息的子节点 */
 	private List<PerfStatisticsNode> children = new ArrayList<PerfStatisticsNode>();
 
 	protected PerfStatisticsNode() {
 	}
 
-	public PerfStatisticsNode(String name, String path, PerfStatisticsNode parent) {
+	public PerfStatisticsNode(String name, String path) {
 		this.name = name;
 		this.path = path;
-		this.parent = parent;
-		if (parent != null) {
-			parent.children.add(this);
-		}
 	}
 
 	/** 将单次执行结果汇总到本次统计信息中，次数+1，执行时间累加，最大执行时间取最大值等 */
@@ -186,14 +180,6 @@ public class PerfStatisticsNode implements Serializable {
 
 	public void setErrorTotalUseTimeNanoExcludeChildren(long errorTotalUseTimeNanoExcludeChildren) {
 		this.errorTotalUseTimeNanoExcludeChildren = errorTotalUseTimeNanoExcludeChildren;
-	}
-
-	public PerfStatisticsNode getParent() {
-		return parent;
-	}
-
-	public void setParent(PerfStatisticsNode parent) {
-		this.parent = parent;
 	}
 
 	public List<PerfStatisticsNode> getChildren() {
