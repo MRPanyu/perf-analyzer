@@ -7,11 +7,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -19,6 +23,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -31,7 +36,6 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -71,10 +75,11 @@ public class RootController {
 
 	protected PerfStatisticsTimedGroup selectedGroup;
 
+	protected ExecutorService executorService = Executors.newSingleThreadExecutor();
+
 	@FXML
 	public void initialize() {
 		// 工具条初始化
-		
 		HBox.setHgrow(toolBarSpacer, Priority.ALWAYS);
 		// 左侧列表选择事件
 		listViewGroups.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -116,6 +121,11 @@ public class RootController {
 				});
 	}
 
+	/** 关闭事件，由Main类中注册到窗口关闭操作中 */
+	public void onClose() {
+		executorService.shutdownNow();
+	}
+
 	/** 打开文件事件 */
 	@FXML
 	public void onOpen(ActionEvent event) {
@@ -134,44 +144,26 @@ public class RootController {
 		}
 	}
 
-	/** 导出Excel(所选)事件 */
-	@FXML
-	public void onExportSelected(ActionEvent event) {
-		Stage stage = (Stage) root.getScene().getWindow();
-		if (groups == null) {
-			showAlert(AlertType.WARNING, "请先打开性能分析文件");
-			return;
-		}
-		if (selectedGroup == null) {
-			showAlert(AlertType.WARNING, "请先选择某一分钟的记录");
-			return;
-		}
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("导出Excel文件");
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Excel文件(*.xlsx)", "*.xlsx"),
-				new ExtensionFilter("所有文件(*.*)", "*.*"));
-		file = fileChooser.showSaveDialog(stage);
-		try {
-			if (file != null) {
-				try (Workbook wb = new XSSFWorkbook(); FileOutputStream fout = new FileOutputStream(file)) {
-					ExcelExporter exporter = new ExcelExporter();
-					exporter.exportSheet(wb, selectedGroup);
-					wb.write(new FileOutputStream(file));
-				}
-				showAlert(AlertType.INFORMATION, "导出完成");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			showAlert(AlertType.ERROR, "导出异常：" + e.getClass().getName() + ": " + e.getMessage());
-		}
-	}
-
 	/** 导出Excel(全部)事件 */
 	@FXML
 	public void onExportAll(ActionEvent event) {
+		exportExcel(false);
+	}
+
+	/** 导出Excel(当前查看)事件 */
+	@FXML
+	public void onExportVisible(ActionEvent event) {
+		exportExcel(true);
+	}
+
+	private void exportExcel(boolean exportVisible) {
 		Stage stage = (Stage) root.getScene().getWindow();
 		if (groups == null) {
 			showAlert(AlertType.WARNING, "请先打开性能分析文件");
+			return;
+		}
+		if (exportVisible && (treeTableNodes.getRoot() == null || treeTableNodes.getRoot().getChildren().isEmpty())) {
+			showAlert(AlertType.WARNING, "当前未显示任何节点");
 			return;
 		}
 		FileChooser fileChooser = new FileChooser();
@@ -179,23 +171,37 @@ public class RootController {
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Excel文件(*.xlsx)", "*.xlsx"),
 				new ExtensionFilter("所有文件(*.*)", "*.*"));
 		file = fileChooser.showSaveDialog(stage);
-		try {
-			if (file != null) {
+		if (file != null) {
+			final Alert progress = showProgress("正在导出，请稍候...");
+			executorService.submit(() -> {
 				try (Workbook wb = new XSSFWorkbook(); FileOutputStream fout = new FileOutputStream(file)) {
-					ExcelExporter exporter = new ExcelExporter();
-					for (PerfStatisticsTimedGroup group : groups) {
-						exporter.exportSheet(wb, group);
+					ExcelExporter exporter = new ExcelExporter(wb);
+					if (exportVisible) {
+						exporter.exportSheet(selectedGroup, treeTableNodes.getRoot());
+					} else {
+						for (PerfStatisticsTimedGroup group : groups) {
+							exporter.exportSheet(group, null);
+						}
 					}
 					wb.write(new FileOutputStream(file));
+					Platform.runLater(() -> {
+						progress.setResult(ButtonType.FINISH);
+						progress.close();
+						showAlert(AlertType.INFORMATION, "导出完成");
+					});
+				} catch (Exception e) {
+					e.printStackTrace();
+					Platform.runLater(() -> {
+						progress.setResult(ButtonType.FINISH);
+						progress.close();
+						showAlert(AlertType.ERROR, "导出异常：" + e.getClass().getName() + ": " + e.getMessage());
+					});
 				}
-				showAlert(AlertType.INFORMATION, "导出完成");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			showAlert(AlertType.ERROR, "导出异常：" + e.getClass().getName() + ": " + e.getMessage());
+			});
 		}
 	}
 
+	/** 过滤根节点 */
 	@FXML
 	public void onTxtFilterChange(Event event) {
 		try {
@@ -203,6 +209,35 @@ public class RootController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/** 全部展开 */
+	@FXML
+	public void onExpandAll(ActionEvent event) {
+		TreeItem<?> root = treeTableNodes.getRoot();
+		if (root != null) {
+			for (TreeItem<?> child : root.getChildren()) {
+				setExpandRecursive(child, true);
+			}
+		}
+	}
+
+	/** 全部收起 */
+	@FXML
+	public void onCollapseAll(ActionEvent event) {
+		TreeItem<?> root = treeTableNodes.getRoot();
+		if (root != null) {
+			for (TreeItem<?> child : root.getChildren()) {
+				setExpandRecursive(child, false);
+			}
+		}
+	}
+
+	private void setExpandRecursive(TreeItem<?> treeItem, boolean expanded) {
+		for (TreeItem<?> child : treeItem.getChildren()) {
+			setExpandRecursive(child, expanded);
+		}
+		treeItem.setExpanded(expanded);
 	}
 
 	public void loadData(File file) throws Exception {
@@ -281,11 +316,19 @@ public class RootController {
 		}
 	}
 
-	private void showAlert(AlertType type, String message) {
+	private Optional<ButtonType> showAlert(AlertType type, String message) {
 		Stage stage = (Stage) root.getScene().getWindow();
 		Alert alert = new Alert(type, message);
 		alert.initOwner(stage);
-		alert.showAndWait();
+		return alert.showAndWait();
+	}
+
+	private Alert showProgress(String message) {
+		Stage stage = (Stage) root.getScene().getWindow();
+		Alert alert = new Alert(AlertType.NONE, message);
+		alert.initOwner(stage);
+		alert.show();
+		return alert;
 	}
 
 }

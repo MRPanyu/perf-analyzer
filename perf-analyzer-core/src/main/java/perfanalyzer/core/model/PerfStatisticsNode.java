@@ -245,82 +245,82 @@ public class PerfStatisticsNode implements Serializable {
 		return safeDivide(this.errorTotalUseTimeNanoExcludeChildren, this.errorCount);
 	}
 
-	public String getSuccessMaxUseTime() {
+	public BigDecimal getSuccessMaxUseTime() {
 		return nanoToMillis(getSuccessMaxUseTimeNano());
 	}
 
-	public String getSuccessMaxUseTimeExcludeChildren() {
+	public BigDecimal getSuccessMaxUseTimeExcludeChildren() {
 		return nanoToMillis(getSuccessMaxUseTimeNanoExcludeChildren());
 	}
 
-	public String getErrorMaxUseTime() {
+	public BigDecimal getErrorMaxUseTime() {
 		return nanoToMillis(getErrorMaxUseTimeNano());
 	}
 
-	public String getErrorMaxUseTimeExcludeChildren() {
+	public BigDecimal getErrorMaxUseTimeExcludeChildren() {
 		return nanoToMillis(getErrorMaxUseTimeNanoExcludeChildren());
 	}
 
-	public String getSuccessTotalUseTime() {
+	public BigDecimal getSuccessTotalUseTime() {
 		return nanoToMillis(getSuccessTotalUseTimeNano());
 	}
 
-	public String getSuccessTotalUseTimeExcludeChildren() {
+	public BigDecimal getSuccessTotalUseTimeExcludeChildren() {
 		return nanoToMillis(getSuccessTotalUseTimeNanoExcludeChildren());
 	}
 
-	public String getErrorTotalUseTime() {
+	public BigDecimal getErrorTotalUseTime() {
 		return nanoToMillis(getErrorTotalUseTimeNano());
 	}
 
-	public String getErrorTotalUseTimeExcludeChildren() {
+	public BigDecimal getErrorTotalUseTimeExcludeChildren() {
 		return nanoToMillis(getErrorTotalUseTimeNanoExcludeChildren());
 	}
 
-	public String getMaxUseTime() {
+	public BigDecimal getMaxUseTime() {
 		return nanoToMillis(getMaxUseTimeNano());
 	}
 
-	public String getMaxUseTimeExcludeChildren() {
+	public BigDecimal getMaxUseTimeExcludeChildren() {
 		return nanoToMillis(getMaxUseTimeNanoExcludeChildren());
 	}
 
-	public String getTotalUseTime() {
+	public BigDecimal getTotalUseTime() {
 		return nanoToMillis(getTotalUseTimeNano());
 	}
 
-	public String getTotalUseTimeExcludeChildren() {
+	public BigDecimal getTotalUseTimeExcludeChildren() {
 		return nanoToMillis(getTotalUseTimeNanoExcludeChildren());
 	}
 
-	public String getAvgUseTime() {
+	public BigDecimal getAvgUseTime() {
 		return nanoToMillis(getAvgUseTimeNano());
 	}
 
-	public String getAvgUseTimeExcludeChildren() {
+	public BigDecimal getAvgUseTimeExcludeChildren() {
 		return nanoToMillis(getAvgUseTimeNanoExcludeChildren());
 	}
 
-	public String getSuccessAvgUseTime() {
+	public BigDecimal getSuccessAvgUseTime() {
 		return nanoToMillis(getSuccessAvgUseTimeNano());
 	}
 
-	public String getSuccessAvgUseTimeExcludeChildren() {
+	public BigDecimal getSuccessAvgUseTimeExcludeChildren() {
 		return nanoToMillis(getSuccessAvgUseTimeNanoExcludeChildren());
 	}
 
-	public String getErrorAvgUseTime() {
+	public BigDecimal getErrorAvgUseTime() {
 		return nanoToMillis(getErrorAvgUseTimeNano());
 	}
 
-	public String getErrorAvgUseTimeExcludeChildren() {
+	public BigDecimal getErrorAvgUseTimeExcludeChildren() {
 		return nanoToMillis(getErrorAvgUseTimeNanoExcludeChildren());
 	}
 
 	/** 纳秒转换为毫秒显示 */
-	private String nanoToMillis(long nano) {
+	private BigDecimal nanoToMillis(long nano) {
 		BigDecimal n = BigDecimal.valueOf(nano).divide(BigDecimal.valueOf(1000000), 2, RoundingMode.HALF_UP);
-		return n.toPlainString();
+		return n;
 	}
 
 }

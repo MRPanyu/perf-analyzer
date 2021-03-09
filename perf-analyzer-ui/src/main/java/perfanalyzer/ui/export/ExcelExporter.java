@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import javafx.scene.control.TreeItem;
 import perfanalyzer.core.model.PerfStatisticsGroup;
 import perfanalyzer.core.model.PerfStatisticsNode;
 import perfanalyzer.core.model.PerfStatisticsTimedGroup;
@@ -39,12 +40,26 @@ public class ExcelExporter {
 
 	private Map<String, PropertyDescriptor> propertyDescriptorMap = new HashMap<>();
 
-	public void exportSheet(Workbook wb, PerfStatisticsTimedGroup group) {
+	private Workbook wb;
+	private CellStyle headerStyle;
+	private CellStyle dataStyle;
+
+	public ExcelExporter(Workbook wb) {
+		this.wb = wb;
+	}
+
+	/**
+	 * 将统计组信息导出到Excel单个Sheet中
+	 * 
+	 * @param group    统计组信息
+	 * @param treeItem 如果为null，则导出整个统计组数据，如果不为null，则按这个TreeItem对象的节点及排序进行导出
+	 */
+	public void exportSheet(PerfStatisticsTimedGroup group, TreeItem<PerfStatisticsNode> treeItem) {
 		try {
 			String sheetName = new SimpleDateFormat("yyyyMMddHHmm").format(group.getStatisticsStartTime());
 			Sheet sheet = wb.createSheet(sheetName);
 			writeHeader(wb, sheet, group);
-			writeData(wb, sheet, group);
+			writeData(wb, sheet, group, treeItem);
 			for (int i = 0; i < HEADERS.length; i++) {
 				sheet.autoSizeColumn(i);
 			}
@@ -66,29 +81,39 @@ public class ExcelExporter {
 	}
 
 	private CellStyle headerStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setAlignment(HorizontalAlignment.LEFT);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderBottom(BorderStyle.THIN);
-		style.setFillForegroundColor(IndexedColors.SKY_BLUE.index);
-		style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-		Font font = wb.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		return style;
+		if (headerStyle == null) {
+			CellStyle style = wb.createCellStyle();
+			style.setAlignment(HorizontalAlignment.LEFT);
+			style.setBorderLeft(BorderStyle.THIN);
+			style.setBorderRight(BorderStyle.THIN);
+			style.setBorderTop(BorderStyle.THIN);
+			style.setBorderBottom(BorderStyle.THIN);
+			style.setFillForegroundColor(IndexedColors.SKY_BLUE.index);
+			style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			Font font = wb.createFont();
+			font.setBold(true);
+			style.setFont(font);
+			headerStyle = style;
+		}
+		return headerStyle;
 	}
 
-	private void writeData(Workbook wb, Sheet sheet, PerfStatisticsGroup group) throws Exception {
+	private void writeData(Workbook wb, Sheet sheet, PerfStatisticsGroup group, TreeItem<PerfStatisticsNode> treeItem)
+			throws Exception {
 		AtomicInteger rownum = new AtomicInteger(1);
-		for (PerfStatisticsNode node : group.getRootNodes()) {
-			writeDataRow(wb, sheet, node, 0, rownum);
+		if (treeItem == null) {
+			for (PerfStatisticsNode node : group.getRootNodes()) {
+				writeDataRow(wb, sheet, node, null, 0, rownum);
+			}
+		} else {
+			for (TreeItem<PerfStatisticsNode> childItem : treeItem.getChildren()) {
+				writeDataRow(wb, sheet, childItem.getValue(), childItem, 0, rownum);
+			}
 		}
 	}
 
-	private void writeDataRow(Workbook wb, Sheet sheet, PerfStatisticsNode node, int level, AtomicInteger rownum)
-			throws Exception {
+	private void writeDataRow(Workbook wb, Sheet sheet, PerfStatisticsNode node, TreeItem<PerfStatisticsNode> treeItem,
+			int level, AtomicInteger rownum) throws Exception {
 		int rn = rownum.getAndIncrement();
 		Row row = sheet.createRow(rn);
 		for (int i = 0; i < PROPERTIES.length; i++) {
@@ -109,23 +134,36 @@ public class ExcelExporter {
 			cell.setCellStyle(style);
 			cell.setCellValue(value);
 		}
-		if (node.getChildren() != null && !node.getChildren().isEmpty()) {
-			for (PerfStatisticsNode child : node.getChildren()) {
-				writeDataRow(wb, sheet, child, level + 1, rownum);
+		if (treeItem == null) {
+			if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+				for (PerfStatisticsNode child : node.getChildren()) {
+					writeDataRow(wb, sheet, child, null, level + 1, rownum);
+				}
+				int rnEnd = rownum.get();
+				sheet.groupRow(rn + 1, rnEnd);
 			}
-			int rnEnd = rownum.get();
-			sheet.groupRow(rn + 1, rnEnd);
+		} else {
+			if (treeItem.getChildren() != null && !treeItem.getChildren().isEmpty()) {
+				for (TreeItem<PerfStatisticsNode> childItem : treeItem.getChildren()) {
+					writeDataRow(wb, sheet, childItem.getValue(), childItem, level + 1, rownum);
+				}
+				int rnEnd = rownum.get();
+				sheet.groupRow(rn + 1, rnEnd);
+			}
 		}
 	}
 
 	private CellStyle dataStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setAlignment(HorizontalAlignment.LEFT);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderBottom(BorderStyle.THIN);
-		return style;
+		if (dataStyle == null) {
+			CellStyle style = wb.createCellStyle();
+			style.setAlignment(HorizontalAlignment.LEFT);
+			style.setBorderLeft(BorderStyle.THIN);
+			style.setBorderRight(BorderStyle.THIN);
+			style.setBorderTop(BorderStyle.THIN);
+			style.setBorderBottom(BorderStyle.THIN);
+			dataStyle = style;
+		}
+		return dataStyle;
 	}
 
 	private String getProperty(PerfStatisticsNode node, String property) throws Exception {

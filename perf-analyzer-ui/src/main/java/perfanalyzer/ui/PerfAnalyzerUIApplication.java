@@ -19,7 +19,9 @@ public class PerfAnalyzerUIApplication extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Parent root = FXMLLoader.load(getClass().getResource("root.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("root.fxml"));
+		Parent root = loader.load();
+		RootController controller = loader.getController();
 
 		Scene scene = new Scene(root, 1024, 600);
 
@@ -27,6 +29,9 @@ public class PerfAnalyzerUIApplication extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("analyze.png")));
 		primaryStage.setMaximized(true);
+		primaryStage.setOnCloseRequest(event -> {
+			controller.onClose();
+		});
 		primaryStage.show();
 	}
 

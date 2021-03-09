@@ -32,7 +32,7 @@
 					</ImageView>
 				</graphic>
 			</Button>
-			<Button onAction="#onExportSelected" text="导出Excel(所选)">
+			<Button onAction="#onExportAll" text="导出Excel(全部)">
 				<graphic>
 					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
 						<image>
@@ -41,7 +41,7 @@
 					</ImageView>
 				</graphic>
 			</Button>
-			<Button onAction="#onExportAll" text="导出Excel(全部)">
+			<Button onAction="#onExportVisible" text="导出Excel(当前查看)">
 				<graphic>
 					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
 						<image>
@@ -57,6 +57,24 @@
 		</ToolBar>
 		
 		<ToolBar>
+			<Button onAction="#onExpandAll" text="全部展开">
+				<graphic>
+					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+						<image>
+							<Image url="/perfanalyzer/ui/expand.png" />
+						</image>
+					</ImageView>
+				</graphic>
+			</Button>
+			<Button onAction="#onCollapseAll" text="全部收起">
+				<graphic>
+					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+						<image>
+							<Image url="/perfanalyzer/ui/collapse.png" />
+						</image>
+					</ImageView>
+				</graphic>
+			</Button>
 			<Label text="过滤根节点">
 				<graphic>
 					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
@@ -73,7 +91,7 @@
 	<ListView fx:id="listViewGroups" GridPane.columnIndex="0" GridPane.rowIndex="1">
 	</ListView>
 	
-	<TreeTableView fx:id="treeTableNodes" GridPane.columnIndex="1" GridPane.rowIndex="1" showRoot="false">
+	<TreeTableView fx:id="treeTableNodes" showRoot="false" sortMode="ALL_DESCENDANTS" GridPane.columnIndex="1" GridPane.rowIndex="1">
 		<columns>
 			<TreeTableColumn fx:id="treeTableColumnName" text="方法名" prefWidth="500">
 				<cellValueFactory>
