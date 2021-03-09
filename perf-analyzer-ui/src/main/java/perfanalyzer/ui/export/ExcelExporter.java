@@ -19,6 +19,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import javafx.scene.control.TreeItem;
 import perfanalyzer.core.model.PerfStatisticsGroup;
@@ -63,6 +64,8 @@ public class ExcelExporter {
 			for (int i = 0; i < HEADERS.length; i++) {
 				sheet.autoSizeColumn(i);
 			}
+			sheet.setColumnWidth(0, 8 * 256); // 层级列稍宽，显示筛选箭头
+			sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, 0));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -139,16 +142,20 @@ public class ExcelExporter {
 				for (PerfStatisticsNode child : node.getChildren()) {
 					writeDataRow(wb, sheet, child, null, level + 1, rownum);
 				}
-				int rnEnd = rownum.get();
-				sheet.groupRow(rn + 1, rnEnd);
+				if (level < 7) {
+					int rnEnd = rownum.get();
+					sheet.groupRow(rn + 1, rnEnd);
+				}
 			}
 		} else {
 			if (treeItem.getChildren() != null && !treeItem.getChildren().isEmpty()) {
 				for (TreeItem<PerfStatisticsNode> childItem : treeItem.getChildren()) {
 					writeDataRow(wb, sheet, childItem.getValue(), childItem, level + 1, rownum);
 				}
-				int rnEnd = rownum.get();
-				sheet.groupRow(rn + 1, rnEnd);
+				if (level < 7) {
+					int rnEnd = rownum.get();
+					sheet.groupRow(rn + 1, rnEnd);
+				}
 			}
 		}
 	}
