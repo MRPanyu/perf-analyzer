@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import perfanalyzer.core.model.PerfStatisticsGroup;
 import perfanalyzer.core.model.PerfStatisticsNode;
+import perfanalyzer.core.model.PerfStatisticsTimedGroup;
 
 public class ExcelExporter {
 
@@ -38,7 +39,7 @@ public class ExcelExporter {
 
 	private Map<String, PropertyDescriptor> propertyDescriptorMap = new HashMap<>();
 
-	public void exportSheet(Workbook wb, PerfStatisticsGroup group) {
+	public void exportSheet(Workbook wb, PerfStatisticsTimedGroup group) {
 		try {
 			String sheetName = new SimpleDateFormat("yyyyMMddHHmm").format(group.getStatisticsStartTime());
 			Sheet sheet = wb.createSheet(sheetName);

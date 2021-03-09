@@ -10,6 +10,7 @@ import perfanalyzer.core.io.PerfIOFileImpl;
 import perfanalyzer.core.model.PerfNode;
 import perfanalyzer.core.model.PerfStatisticsGroup;
 import perfanalyzer.core.model.PerfStatisticsNode;
+import perfanalyzer.core.model.PerfStatisticsTimedGroup;
 
 /**
  * 记录性能数据的主工具类
@@ -25,9 +26,11 @@ public class PerfRecorder {
 	/** 用于执行异步任务的线程池 */
 	private static ExecutorService executorService = Executors.newCachedThreadPool();
 	/** 当前一分钟的统计信息组 */
-	private static PerfStatisticsGroup perfStatisticsGroup = null;
+	private static PerfStatisticsTimedGroup perfStatisticsTimedGroup = null;
 	/** 当前线程所处的代码块对应执行节点信息 */
 	private static ThreadLocal<PerfNode> nodeStorage = new ThreadLocal<PerfNode>();
+	/** 汇总当前线程中执行信息的临时统计组，在根节点执行完成后再汇总到当前一分钟的统计组中 */
+	private static ThreadLocal<PerfStatisticsGroup> statisticsGroupStorage = new ThreadLocal<PerfStatisticsGroup>();
 
 	/**
 	 * 某个程序块执行前调用
@@ -39,6 +42,10 @@ public class PerfRecorder {
 		PerfNode parent = nodeStorage.get();
 		PerfNode node = new PerfNode(name, System.nanoTime(), parent);
 		nodeStorage.set(node);
+		if (parent == null) {
+			PerfStatisticsGroup statisticsGroup = new PerfStatisticsGroup();
+			statisticsGroupStorage.set(statisticsGroup);
+		}
 	}
 
 	/**
@@ -49,46 +56,43 @@ public class PerfRecorder {
 	public static void end(boolean isError) {
 		// 记录完成时间，然后堆栈中弹出当前执行块回到上一层
 		final PerfNode node = nodeStorage.get();
+		final PerfStatisticsGroup perfStatisticsGroup = statisticsGroupStorage.get();
 		node.setEndTimeNano(System.nanoTime());
 		node.setError(isError);
+
+		// 获取父节点
 		PerfNode parent = node.getParent();
-		nodeStorage.set(parent);
-		// 如果已经回到根节点，则开一个异步线程（避免影响性能）合并到统计信息里面
-		if (parent == null) {
-			executorService.submit(new Runnable() {
-				@Override
-				public void run() {
-					mergeStatistics(node);
-				}
-			});
+		if (parent != null) {
+			// 累加父节点中的子节点耗时信息
+			parent.addChildrenUseTime(node.getUseTimeNano());
 		}
+		// 当前节点设置为父节点
+		nodeStorage.set(parent);
+
+		// 异步执行（避免影响性能）合并到统计信息里面
+		executorService.submit(new Runnable() {
+			@Override
+			public void run() {
+				// 本节点本身要计入当前统计信息
+				PerfStatisticsNode perfStatisticsNode = perfStatisticsGroup.getOrCreateNode(node.getPath());
+				perfStatisticsNode.mergeNode(node);
+				// 如果已经回到顶层节点，则汇总到当前一分钟的组里面
+				if (node.getParent() == null) {
+					mergeStatisticsTimedGroup(perfStatisticsGroup);
+				}
+			}
+		});
 	}
 
 	/** 将当前线程已完成的根节点信息汇总到统计信息当中 */
-	private static void mergeStatistics(PerfNode node) {
+	private static void mergeStatisticsTimedGroup(PerfStatisticsGroup statisticsGroup) {
 		// 判断是否需要滚动统计信息，将上一分钟的统计信息写入文件，然后开启一个新的
 		long now = System.currentTimeMillis();
-		if (perfStatisticsGroup == null || now > perfStatisticsGroup.getStatisticsEndTime()) {
-			rollStatisticsGroup(now);
+		if (perfStatisticsTimedGroup == null || now > perfStatisticsTimedGroup.getStatisticsEndTime()) {
+			rollStatisticsTimedGroup(now);
 		}
-		// 递归合并节点信息到统计信息中
-		mergeStatistics(node, perfStatisticsGroup);
-	}
-
-	/**
-	 * 递归合并某个执行节点到对应的统计信息中
-	 * 
-	 * @param node  执行信息节点
-	 * @param group 记录到的统计组，注意记录时从根节点到叶节点都必须记录到同一个统计组里面，为避免滚动的时候切换统计组，这里用方法入参来传递，而不能用静态变量的当前统计组
-	 */
-	private static void mergeStatistics(PerfNode node, PerfStatisticsGroup group) {
-		PerfNode parentNode = node.getParent();
-		String parentPath = parentNode == null ? null : parentNode.getPath();
-		PerfStatisticsNode st = group.getOrCreateNode(node.getName(), node.getPath(), parentPath);
-		st.mergeNode(node);
-		for (PerfNode child : node.getChildren()) {
-			mergeStatistics(child, group);
-		}
+		// 合并节点信息到统计信息中
+		perfStatisticsTimedGroup.mergeStatisticsGroup(statisticsGroup);
 	}
 
 	/**
@@ -96,10 +100,10 @@ public class PerfRecorder {
 	 * 
 	 * @param now 滚动时的当前时间
 	 */
-	private synchronized static void rollStatisticsGroup(long now) {
-		if (perfStatisticsGroup == null || now > perfStatisticsGroup.getStatisticsEndTime()) {
+	private synchronized static void rollStatisticsTimedGroup(long now) {
+		if (perfStatisticsTimedGroup == null || now > perfStatisticsTimedGroup.getStatisticsEndTime()) {
 			// 启动写入文件的线程
-			writeStatisticsGroup(perfStatisticsGroup);
+			writeStatisticsTimedGroup(perfStatisticsTimedGroup);
 			// 新建一个当前统计组
 			Calendar cal = Calendar.getInstance();
 			cal.setTimeInMillis(now);
@@ -107,12 +111,12 @@ public class PerfRecorder {
 			cal.set(Calendar.MILLISECOND, 0);
 			long statisticsStartTime = cal.getTimeInMillis();
 			long statisticsEndTime = statisticsStartTime + 60000L;
-			perfStatisticsGroup = new PerfStatisticsGroup(statisticsStartTime, statisticsEndTime);
+			perfStatisticsTimedGroup = new PerfStatisticsTimedGroup(statisticsStartTime, statisticsEndTime);
 		}
 	}
 
 	/** 统计组信息写入文件 */
-	private static void writeStatisticsGroup(final PerfStatisticsGroup group) {
+	private static void writeStatisticsTimedGroup(final PerfStatisticsGroup group) {
 		executorService.submit(new Runnable() {
 			@Override
 			public void run() {
@@ -120,7 +124,7 @@ public class PerfRecorder {
 					// 休眠1秒，尽量保证切换间隔mergeStatistics都完成
 					Thread.sleep(1000);
 					synchronized (group) {
-						perfIO.savePerfStatisticsGroup(group);
+						perfIO.saveItem(group);
 					}
 				} catch (Exception e) {
 				}

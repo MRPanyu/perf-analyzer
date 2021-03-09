@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import perfanalyzer.core.model.PerfStatisticsGroup;
@@ -20,17 +21,17 @@ import perfanalyzer.core.model.PerfStatisticsGroup;
 public abstract class PerfIOSupport {
 
 	/**
-	 * 写入性能统计信息
+	 * 写入对象
 	 * 
-	 * @param out   输出流
-	 * @param group 性能统计信息
+	 * @param out 输出流
+	 * @param obj 需写入的对象
 	 * @throws IOException
 	 */
-	public static void writePerfStatisticsGroup(OutputStream out, PerfStatisticsGroup group) throws IOException {
+	public static void writeObject(OutputStream out, Serializable obj) throws IOException {
 		// 将对象序列化成byte数组
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		ObjectOutputStream oout = new ObjectOutputStream(bout);
-		oout.writeObject(group);
+		oout.writeObject(obj);
 		oout.close();
 		byte[] data = bout.toByteArray();
 
@@ -43,15 +44,14 @@ public abstract class PerfIOSupport {
 	}
 
 	/**
-	 * 读取输入流中下一个性能统计信息
+	 * 读取输入流中下一个对象
 	 * 
 	 * @param in 输入流
-	 * @return 读取到的性能统计信息
+	 * @return 读取到的对象
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public static PerfStatisticsGroup readPerfStatisticsGroup(InputStream in)
-			throws IOException, ClassNotFoundException {
+	public static Serializable readObject(InputStream in) throws IOException, ClassNotFoundException {
 		// 读取4字节int，表示后面整段内容长度
 		byte[] lengthHead = new byte[4];
 		int count = readFully(in, lengthHead);

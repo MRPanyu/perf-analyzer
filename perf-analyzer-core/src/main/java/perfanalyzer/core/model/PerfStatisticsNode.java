@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 性能节点统计数据，表示某个代码块（如方法执行等）的一段时间内的执行统计信息。
+ * 性能节点统计数据，表示某个代码块（如方法执行等）若干次执行的统计信息。
  * 
  * @author panyu
  *
@@ -23,10 +23,8 @@ public class PerfStatisticsNode implements Serializable {
 		return a / b;
 	}
 
-	/** 代码块标识名称，对应{@link PerfNode#name} */
-	private String name;
-	/** 代码块完整路径，对应{@link PerfNode#path} */
-	private String path;
+	/** 完整的执行节点路径 */
+	private NodePath path;
 	/** 执行成功的次数 */
 	private long successCount = 0L;
 	/** 执行错误/异常的次数 */
@@ -54,8 +52,7 @@ public class PerfStatisticsNode implements Serializable {
 	protected PerfStatisticsNode() {
 	}
 
-	public PerfStatisticsNode(String name, String path) {
-		this.name = name;
+	public PerfStatisticsNode(NodePath path) {
 		this.path = path;
 	}
 
@@ -86,20 +83,34 @@ public class PerfStatisticsNode implements Serializable {
 		}
 	}
 
+	/** 将一个执行汇总信息累加到本地汇总信息当中 */
+	public synchronized void mergeStatisticsNode(PerfStatisticsNode stNode) {
+		this.successCount += stNode.successCount;
+		this.successTotalUseTimeNano += stNode.successTotalUseTimeNano;
+		this.successTotalUseTimeNanoExcludeChildren += stNode.successTotalUseTimeNanoExcludeChildren;
+		if (stNode.successMaxUseTimeNano > this.successMaxUseTimeNano) {
+			this.successMaxUseTimeNano = stNode.successMaxUseTimeNano;
+		}
+		if (stNode.successMaxUseTimeNanoExcludeChildren > this.successMaxUseTimeNanoExcludeChildren) {
+			this.successMaxUseTimeNanoExcludeChildren = stNode.successMaxUseTimeNanoExcludeChildren;
+		}
+		this.errorCount += stNode.errorCount;
+		this.errorTotalUseTimeNano += stNode.errorTotalUseTimeNano;
+		this.errorTotalUseTimeNanoExcludeChildren += stNode.errorTotalUseTimeNanoExcludeChildren;
+		if (stNode.errorMaxUseTimeNano > this.errorMaxUseTimeNano) {
+			this.errorMaxUseTimeNano = stNode.errorMaxUseTimeNano;
+		}
+		if (stNode.errorMaxUseTimeNanoExcludeChildren > this.errorMaxUseTimeNanoExcludeChildren) {
+			this.errorMaxUseTimeNanoExcludeChildren = stNode.errorMaxUseTimeNanoExcludeChildren;
+		}
+	}
+
 	public String getName() {
-		return name;
+		return path.getName();
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getPath() {
+	public NodePath getPath() {
 		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
 	}
 
 	public long getSuccessCount() {

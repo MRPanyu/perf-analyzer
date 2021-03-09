@@ -4,10 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import perfanalyzer.core.model.PerfStatisticsGroup;
 
 /**
  * 用文件存储性能统计信息。
@@ -26,11 +25,11 @@ public class PerfIOFileImpl implements PerfIO {
 	}
 
 	@Override
-	public void savePerfStatisticsGroup(PerfStatisticsGroup group) {
+	public void saveItem(Serializable item) {
 		try {
 			FileOutputStream out = new FileOutputStream(file, true);
 			try {
-				PerfIOSupport.writePerfStatisticsGroup(out, group);
+				PerfIOSupport.writeObject(out, item);
 			} finally {
 				out.close();
 			}
@@ -40,17 +39,17 @@ public class PerfIOFileImpl implements PerfIO {
 	}
 
 	@Override
-	public List<PerfStatisticsGroup> loadPerfStatisticsGroups() {
+	public List<Serializable> loadAll() {
 		try {
-			List<PerfStatisticsGroup> list = new ArrayList<PerfStatisticsGroup>();
+			List<Serializable> list = new ArrayList<Serializable>();
 			FileInputStream in = new FileInputStream(file);
 			try {
 				while (true) {
-					PerfStatisticsGroup group = PerfIOSupport.readPerfStatisticsGroup(in);
-					if (group == null) {
+					Serializable item = PerfIOSupport.readObject(in);
+					if (item == null) {
 						break;
 					}
-					list.add(group);
+					list.add(item);
 				}
 			} finally {
 				in.close();

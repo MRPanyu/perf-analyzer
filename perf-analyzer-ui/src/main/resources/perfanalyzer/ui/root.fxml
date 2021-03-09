@@ -21,35 +21,54 @@
 		<RowConstraints vgrow="ALWAYS"></RowConstraints>
 	</rowConstraints>
 
-	<ToolBar GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
-		<Button onAction="#onOpen" text="打开文件">
-			<graphic>
-				<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
-					<image>
-						<Image url="/perfanalyzer/ui/open.png" />
-					</image>
-				</ImageView>
-			</graphic>
-		</Button>
-		<Button onAction="#onExportSelected" text="导出Excel(所选)">
-			<graphic>
-				<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
-					<image>
-						<Image url="/perfanalyzer/ui/excel.png" />
-					</image>
-				</ImageView>
-			</graphic>
-		</Button>
-		<Button onAction="#onExportAll" text="导出Excel(全部)">
-			<graphic>
-				<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
-					<image>
-						<Image url="/perfanalyzer/ui/excel.png" />
-					</image>
-				</ImageView>
-			</graphic>
-		</Button>
-	</ToolBar>
+	<HBox fx:id="toolBarHBox" spacing="0" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+		<ToolBar>
+			<Button onAction="#onOpen" text="打开文件">
+				<graphic>
+					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+						<image>
+							<Image url="/perfanalyzer/ui/open.png" />
+						</image>
+					</ImageView>
+				</graphic>
+			</Button>
+			<Button onAction="#onExportSelected" text="导出Excel(所选)">
+				<graphic>
+					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+						<image>
+							<Image url="/perfanalyzer/ui/excel.png" />
+						</image>
+					</ImageView>
+				</graphic>
+			</Button>
+			<Button onAction="#onExportAll" text="导出Excel(全部)">
+				<graphic>
+					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+						<image>
+							<Image url="/perfanalyzer/ui/excel.png" />
+						</image>
+					</ImageView>
+				</graphic>
+			</Button>
+		</ToolBar>
+		
+		<ToolBar fx:id="toolBarSpacer">
+			<TextField visible="false"></TextField>
+		</ToolBar>
+		
+		<ToolBar>
+			<Label text="过滤根节点">
+				<graphic>
+					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+						<image>
+							<Image url="/perfanalyzer/ui/filter.png" />
+						</image>
+					</ImageView>
+				</graphic>
+			</Label>
+			<TextField fx:id="txtFilter" onAction="#onTxtFilterChange"></TextField>
+		</ToolBar>
+	</HBox>
 	
 	<ListView fx:id="listViewGroups" GridPane.columnIndex="0" GridPane.rowIndex="1">
 	</ListView>

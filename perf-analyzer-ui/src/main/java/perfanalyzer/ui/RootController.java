@@ -2,7 +2,9 @@ package perfanalyzer.ui;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,24 +15,31 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import perfanalyzer.core.io.PerfIOFileImpl;
-import perfanalyzer.core.model.PerfStatisticsGroup;
+import perfanalyzer.core.model.NodePath;
 import perfanalyzer.core.model.PerfStatisticsNode;
+import perfanalyzer.core.model.PerfStatisticsTimedGroup;
 import perfanalyzer.ui.export.ExcelExporter;
 
 /**
@@ -44,6 +53,12 @@ public class RootController {
 	@FXML
 	protected GridPane root;
 	@FXML
+	protected TextField txtFilter;
+	@FXML
+	protected HBox toolBarHBox;
+	@FXML
+	protected ToolBar toolBarSpacer;
+	@FXML
 	protected ListView<String> listViewGroups;
 	@FXML
 	protected TreeTableView<PerfStatisticsNode> treeTableNodes;
@@ -52,12 +67,15 @@ public class RootController {
 
 	protected File file;
 
-	protected List<PerfStatisticsGroup> groups;
+	protected List<PerfStatisticsTimedGroup> groups;
 
-	protected PerfStatisticsGroup selectedGroup;
+	protected PerfStatisticsTimedGroup selectedGroup;
 
 	@FXML
 	public void initialize() {
+		// 工具条初始化
+		
+		HBox.setHgrow(toolBarSpacer, Priority.ALWAYS);
 		// 左侧列表选择事件
 		listViewGroups.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 			@Override
@@ -165,7 +183,7 @@ public class RootController {
 			if (file != null) {
 				try (Workbook wb = new XSSFWorkbook(); FileOutputStream fout = new FileOutputStream(file)) {
 					ExcelExporter exporter = new ExcelExporter();
-					for (PerfStatisticsGroup group : groups) {
+					for (PerfStatisticsTimedGroup group : groups) {
 						exporter.exportSheet(wb, group);
 					}
 					wb.write(new FileOutputStream(file));
@@ -178,10 +196,25 @@ public class RootController {
 		}
 	}
 
+	@FXML
+	public void onTxtFilterChange(Event event) {
+		try {
+			renderTreeTableNodes();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void loadData(File file) throws Exception {
 		Stage stage = (Stage) root.getScene().getWindow();
 		PerfIOFileImpl perfIO = new PerfIOFileImpl(file);
-		groups = perfIO.loadPerfStatisticsGroups();
+		List<Serializable> allItems = perfIO.loadAll();
+		groups = new ArrayList<PerfStatisticsTimedGroup>();
+		for (Serializable item : allItems) {
+			if (item instanceof PerfStatisticsTimedGroup) {
+				groups.add((PerfStatisticsTimedGroup) item);
+			}
+		}
 		if (groups != null && !groups.isEmpty()) {
 			stage.setTitle(PerfAnalyzerUIApplication.DEFAULT_TITLE + " - " + file.getCanonicalPath());
 			renderListViewGroups();
@@ -206,7 +239,7 @@ public class RootController {
 			} else {
 				SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 				Date d = fmt.parse(value);
-				for (PerfStatisticsGroup group : groups) {
+				for (PerfStatisticsTimedGroup group : groups) {
 					if (group.getStatisticsStartTime() == d.getTime()) {
 						selectedGroup = group;
 						break;
@@ -223,9 +256,17 @@ public class RootController {
 		if (selectedGroup == null) {
 			treeTableNodes.setRoot(null);
 		} else {
-			PerfStatisticsNode root = new PerfStatisticsNode("root", "root");
+			String filter = txtFilter.getText();
+			NodePath rootPath = NodePath.getInstance("_root", null);
+			PerfStatisticsNode root = new PerfStatisticsNode(rootPath);
 			TreeItem<PerfStatisticsNode> rootItem = new TreeItem<PerfStatisticsNode>(root);
 			for (PerfStatisticsNode node : selectedGroup.getRootNodes()) {
+				if (filter != null && filter.length() > 0) {
+					String name = node.getName();
+					if (!name.contains(filter)) {
+						continue;
+					}
+				}
 				buildTree(rootItem, node);
 			}
 			treeTableNodes.setRoot(rootItem);
