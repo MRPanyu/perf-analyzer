@@ -209,6 +209,14 @@
 				</cellValueFactory>
 			</TreeTableColumn>
 		</columns>
+		<contextMenu>
+			<ContextMenu fx:id="contextMenu">
+				<items>
+					<MenuItem text="复制名称" onAction="#onCopyName" />
+					<MenuItem text="复制整行内容" onAction="#onCopyRow" />
+				</items>
+			</ContextMenu>
+		</contextMenu>
 	</TreeTableView>
 
 </GridPane>

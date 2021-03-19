@@ -25,6 +25,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -34,6 +35,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -70,12 +73,16 @@ public class RootController {
 	protected TreeTableView<PerfStatisticsNode> treeTableNodes;
 	@FXML
 	protected TreeTableColumn<PerfStatisticsNode, Object> treeTableColumnName;
+	@FXML
+	protected ContextMenu contextMenu;
 
 	protected File file;
 
 	protected List<PerfStatisticsTimedGroup> groups;
 
 	protected PerfStatisticsTimedGroup selectedGroup;
+
+	protected Clipboard clipboard = Clipboard.getSystemClipboard();
 
 	protected ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -243,6 +250,39 @@ public class RootController {
 			setExpandRecursive(child, expanded);
 		}
 		treeItem.setExpanded(expanded);
+	}
+
+	/** 复制名称 */
+	@FXML
+	public void onCopyName(ActionEvent event) {
+		TreeItem<PerfStatisticsNode> selectedItem = treeTableNodes.getSelectionModel().getSelectedItem();
+		if (selectedItem != null) {
+			PerfStatisticsNode node = selectedItem.getValue();
+			String name = node.getName();
+			copyToClipboard(name);
+		}
+	}
+
+	/** 复制整行内容 */
+	@FXML
+	public void onCopyRow(ActionEvent event) {
+		TreeItem<PerfStatisticsNode> selectedItem = treeTableNodes.getSelectionModel().getSelectedItem();
+		if (selectedItem != null) {
+			StringBuilder sb = new StringBuilder();
+			for (TreeTableColumn<PerfStatisticsNode, ?> col : treeTableNodes.getColumns()) {
+				String text = ((Label) col.getGraphic()).getText(); // 为了增加tooltip效果，col本身的text是空的
+				Object value = col.getCellData(selectedItem);
+				sb.append(text).append(": ").append(value).append("\n");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			copyToClipboard(sb.toString());
+		}
+	}
+
+	private void copyToClipboard(String text) {
+		ClipboardContent content = new ClipboardContent();
+		content.putString(text);
+		clipboard.setContent(content);
 	}
 
 	public void loadData(File file) throws Exception {
