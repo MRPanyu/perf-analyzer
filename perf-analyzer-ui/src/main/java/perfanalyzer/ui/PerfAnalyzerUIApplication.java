@@ -23,7 +23,7 @@ public class PerfAnalyzerUIApplication extends Application {
 		Parent root = loader.load();
 		RootController controller = loader.getController();
 
-		Scene scene = new Scene(root, 1024, 600);
+		Scene scene = new Scene(root, 1280, 960);
 
 		primaryStage.setTitle(DEFAULT_TITLE);
 		primaryStage.setScene(scene);

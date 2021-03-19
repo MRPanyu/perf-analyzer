@@ -13,15 +13,14 @@
 
 	<padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
 	<columnConstraints>
-		<ColumnConstraints prefWidth="250"></ColumnConstraints>
-		<ColumnConstraints prefWidth="750" hgrow="ALWAYS"></ColumnConstraints>
+		<ColumnConstraints prefWidth="1280" hgrow="ALWAYS"></ColumnConstraints>
 	</columnConstraints>
 	<rowConstraints>
 		<RowConstraints></RowConstraints>
 		<RowConstraints vgrow="ALWAYS"></RowConstraints>
 	</rowConstraints>
 
-	<HBox fx:id="toolBarHBox" spacing="0" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+	<HBox fx:id="toolBarHBox" spacing="0" GridPane.columnIndex="0" GridPane.rowIndex="0">
 		<ToolBar>
 			<Button onAction="#onOpen" text="打开文件">
 				<graphic>
@@ -51,11 +50,11 @@
 				</graphic>
 			</Button>
 		</ToolBar>
-		
+
 		<ToolBar fx:id="toolBarSpacer">
-			<TextField visible="false"></TextField>
+			<TextField visible="false" prefWidth="0"></TextField>
 		</ToolBar>
-		
+
 		<ToolBar>
 			<Button onAction="#onExpandAll" text="全部展开">
 				<graphic>
@@ -87,136 +86,140 @@
 			<TextField fx:id="txtFilter" onAction="#onTxtFilterChange"></TextField>
 		</ToolBar>
 	</HBox>
-	
-	<ListView fx:id="listViewGroups" GridPane.columnIndex="0" GridPane.rowIndex="1">
-	</ListView>
-	
-	<TreeTableView fx:id="treeTableNodes" showRoot="false" sortMode="ALL_DESCENDANTS" GridPane.columnIndex="1" GridPane.rowIndex="1">
-		<columns>
-			<TreeTableColumn fx:id="treeTableColumnName" text="名称" prefWidth="500">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="name" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="类型">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="type" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="执行次数">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="executeCount" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="成功次数">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="successCount" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="异常次数">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="errorCount" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="总耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="totalUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="总耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="totalUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="平均每次耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="avgUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="平均每次耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="avgUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="最大单次耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="maxUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="最大单次耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="maxUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="成功总耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="successTotalUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="成功总耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="successTotalUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="成功次均耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="successAvgUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="成功次均耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="successAvgUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="成功最大耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="successMaxUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="成功最大耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="successMaxUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="异常总耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="errorTotalUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="异常总耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="errorTotalUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="异常次均耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="errorAvgUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="异常次均耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="errorAvgUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="异常最大耗时">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="errorMaxUseTime" />
-				</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="异常最大耗时(除子节点)">
-				<cellValueFactory>
-					<TreeItemPropertyValueFactory property="errorMaxUseTimeExcludeChildren" />
-				</cellValueFactory>
-			</TreeTableColumn>
-		</columns>
-		<contextMenu>
-			<ContextMenu fx:id="contextMenu">
-				<items>
-					<MenuItem text="复制名称" onAction="#onCopyName" />
-					<MenuItem text="复制整行内容" onAction="#onCopyRow" />
-				</items>
-			</ContextMenu>
-		</contextMenu>
-	</TreeTableView>
+
+	<SplitPane GridPane.columnIndex="0" GridPane.rowIndex="1">
+
+		<ListView fx:id="listViewGroups" maxWidth="250">
+		</ListView>
+
+		<TreeTableView fx:id="treeTableNodes" showRoot="false" sortMode="ALL_DESCENDANTS">
+			<columns>
+				<TreeTableColumn fx:id="treeTableColumnName" text="名称" prefWidth="500">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="name" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="类型">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="type" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="执行次数">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="executeCount" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="成功次数">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="successCount" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="异常次数">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="errorCount" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="总耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="totalUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="总耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="totalUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="平均每次耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="avgUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="平均每次耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="avgUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="最大单次耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="maxUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="最大单次耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="maxUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="成功总耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="successTotalUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="成功总耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="successTotalUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="成功次均耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="successAvgUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="成功次均耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="successAvgUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="成功最大耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="successMaxUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="成功最大耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="successMaxUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="异常总耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="errorTotalUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="异常总耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="errorTotalUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="异常次均耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="errorAvgUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="异常次均耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="errorAvgUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="异常最大耗时">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="errorMaxUseTime" />
+					</cellValueFactory>
+				</TreeTableColumn>
+				<TreeTableColumn text="异常最大耗时(除子节点)">
+					<cellValueFactory>
+						<TreeItemPropertyValueFactory property="errorMaxUseTimeExcludeChildren" />
+					</cellValueFactory>
+				</TreeTableColumn>
+			</columns>
+			<contextMenu>
+				<ContextMenu fx:id="contextMenu">
+					<items>
+						<MenuItem text="复制名称" onAction="#onCopyName" />
+						<MenuItem text="复制整行内容" onAction="#onCopyRow" />
+					</items>
+				</ContextMenu>
+			</contextMenu>
+		</TreeTableView>
+
+	</SplitPane>
 
 </GridPane>
