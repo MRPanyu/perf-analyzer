@@ -1,6 +1,9 @@
 # 输出性能数据的文件
 outputFile: "./perf_record.prec"
 
+# 是否拦截记录SQL执行性能
+recordSql: true
+
 # 拦截切面，可配置多个
 aspects:
     # 包含的类名，可用*通配符，可多个分号隔开

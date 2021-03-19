@@ -28,11 +28,11 @@ import perfanalyzer.core.model.PerfStatisticsTimedGroup;
 
 public class ExcelExporter {
 
-	private static final String[] HEADERS = new String[] { "层级", "方法名", "执行次数", "成功次数", "异常次数", "总耗时", "总耗时(除子节点)",
+	private static final String[] HEADERS = new String[] { "层级", "名称", "类型", "执行次数", "成功次数", "异常次数", "总耗时", "总耗时(除子节点)",
 			"平均每次耗时", "平均每次耗时(除子节点)", "最大单次耗时", "最大单次耗时(除子节点)", "成功总耗时", "成功总耗时(除子节点)", "成功次均耗时", "成功次均耗时(除子节点)",
 			"成功最大耗时", "成功最大耗时(除子节点)", "异常总耗时", "异常总耗时(除子节点)", "异常次均耗时", "异常次均耗时(除子节点)", "异常最大耗时", "异常最大耗时(除子节点)" };
 
-	private static final String[] PROPERTIES = new String[] { "level", "name", "executeCount", "successCount",
+	private static final String[] PROPERTIES = new String[] { "level", "name", "type", "executeCount", "successCount",
 			"errorCount", "totalUseTime", "totalUseTimeExcludeChildren", "avgUseTime", "avgUseTimeExcludeChildren",
 			"maxUseTime", "maxUseTimeExcludeChildren", "successTotalUseTime", "successTotalUseTimeExcludeChildren",
 			"successAvgUseTime", "successAvgUseTimeExcludeChildren", "successMaxUseTime",

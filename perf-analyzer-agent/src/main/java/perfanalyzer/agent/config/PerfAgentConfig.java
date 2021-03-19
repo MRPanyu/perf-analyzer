@@ -46,6 +46,8 @@ public class PerfAgentConfig implements Serializable {
 
 	/** 输出性能数据的文件，注意如果是相对路径格式，相对的是程序启动的路径而不是agent jar包的路径 */
 	private String outputFile;
+	/** 是否记录SQL性能 */
+	private Boolean recordSql;
 	/** 拦截进行性能记录的切面 */
 	private List<PerfAgentAspectConfig> aspects = new ArrayList<PerfAgentAspectConfig>();
 
@@ -55,6 +57,14 @@ public class PerfAgentConfig implements Serializable {
 
 	public void setOutputFile(String outputFile) {
 		this.outputFile = outputFile;
+	}
+
+	public Boolean getRecordSql() {
+		return recordSql;
+	}
+
+	public void setRecordSql(Boolean recordSql) {
+		this.recordSql = recordSql;
 	}
 
 	public List<PerfAgentAspectConfig> getAspects() {

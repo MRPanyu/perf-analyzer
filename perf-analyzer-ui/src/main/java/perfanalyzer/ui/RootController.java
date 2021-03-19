@@ -42,6 +42,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import perfanalyzer.core.io.PerfIOFileImpl;
 import perfanalyzer.core.model.NodePath;
+import perfanalyzer.core.model.NodeType;
 import perfanalyzer.core.model.PerfStatisticsNode;
 import perfanalyzer.core.model.PerfStatisticsTimedGroup;
 import perfanalyzer.ui.export.ExcelExporter;
@@ -292,7 +293,7 @@ public class RootController {
 			treeTableNodes.setRoot(null);
 		} else {
 			String filter = txtFilter.getText();
-			NodePath rootPath = NodePath.getInstance("_root", null);
+			NodePath rootPath = NodePath.getInstance("_root", NodeType.METHOD, null); // 虚拟根节点方便显示
 			PerfStatisticsNode root = new PerfStatisticsNode(rootPath);
 			TreeItem<PerfStatisticsNode> rootItem = new TreeItem<PerfStatisticsNode>(root);
 			for (PerfStatisticsNode node : selectedGroup.getRootNodes()) {

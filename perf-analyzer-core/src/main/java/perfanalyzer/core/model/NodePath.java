@@ -16,7 +16,7 @@ public class NodePath implements Serializable {
 
 	private static final long serialVersionUID = -4458084428890672515L;
 
-	private static Map<NodePath, Map<String, NodePath>> instanceMap = new HashMap<NodePath, Map<String, NodePath>>();
+	private static Map<NodePath, NodePath> instanceMap = new HashMap<NodePath, NodePath>();
 
 	/**
 	 * 获取实例
@@ -25,40 +25,34 @@ public class NodePath implements Serializable {
 	 * @param parentPath 上层节点路径，为null时表示本层节点是顶层节点
 	 * @return 节点路径实例
 	 */
-	public static NodePath getInstance(String name, NodePath parentPath) {
-		Map<String, NodePath> map = instanceMap.get(parentPath);
-		if (map == null) {
+	public static NodePath getInstance(String name, NodeType type, NodePath parentPath) {
+		NodePath key = new NodePath(name, type, parentPath);
+		NodePath instance = instanceMap.get(key);
+		if (instance == null) {
 			synchronized (instanceMap) {
-				map = instanceMap.get(parentPath);
-				if (map == null) {
-					map = new HashMap<String, NodePath>();
-					instanceMap.put(parentPath, map);
+				instance = instanceMap.get(key);
+				if (instance == null) {
+					instance = key;
+					instanceMap.put(key, key);
 				}
 			}
 		}
-		NodePath path = map.get(name);
-		if (path == null) {
-			synchronized (map) {
-				path = map.get(name);
-				if (path == null) {
-					path = new NodePath(name, parentPath);
-					map.put(name, path);
-				}
-			}
-		}
-		return path;
+		return instance;
 	}
 
 	/** 当前节点名称 */
 	private String name;
+	/** 节点类型 */
+	private NodeType type = NodeType.METHOD;
 	/** 上层节点路径 */
 	private NodePath parentPath;
 
 	/** Immutable对象且会比较频繁使用到hashCode，进行缓存 */
 	private int _hashCode;
 
-	private NodePath(String name, NodePath parentPath) {
+	private NodePath(String name, NodeType type, NodePath parentPath) {
 		this.name = name;
+		this.type = type;
 		this.parentPath = parentPath;
 		// 计算hashCode值
 		calcHashCode();
@@ -68,23 +62,26 @@ public class NodePath implements Serializable {
 		return name;
 	}
 
+	public NodeType getType() {
+		return type;
+	}
+
 	public NodePath getParentPath() {
 		return parentPath;
 	}
 
 	public String toString() {
-		StringBuilder sb = new StringBuilder("/").append(name);
-		NodePath p = parentPath;
-		while (p != null) {
-			sb.insert(0, "/" + p.name);
-			p = p.parentPath;
+		StringBuilder sb = new StringBuilder();
+		if (parentPath != null) {
+			sb.append(parentPath.toString());
 		}
+		sb.append("/[").append(type.toString()).append("]").append(name);
 		return sb.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		return this._hashCode;
+		return _hashCode;
 	}
 
 	private void calcHashCode() {
@@ -92,7 +89,8 @@ public class NodePath implements Serializable {
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((parentPath == null) ? 0 : parentPath.hashCode());
-		this._hashCode = result;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		_hashCode = result;
 	}
 
 	@Override
@@ -113,6 +111,8 @@ public class NodePath implements Serializable {
 			if (other.parentPath != null)
 				return false;
 		} else if (!parentPath.equals(other.parentPath))
+			return false;
+		if (type != other.type)
 			return false;
 		return true;
 	}

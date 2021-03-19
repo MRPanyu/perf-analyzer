@@ -31,8 +31,8 @@ public class PerfNode implements Serializable {
 	protected PerfNode() {
 	}
 
-	public PerfNode(String name, long startTimeNano, PerfNode parent) {
-		this.path = NodePath.getInstance(name, parent == null ? null : parent.path);
+	public PerfNode(String name, NodeType type, long startTimeNano, PerfNode parent) {
+		this.path = NodePath.getInstance(name, type, parent == null ? null : parent.path);
 		this.startTimeNano = startTimeNano;
 		this.parent = parent;
 	}
@@ -59,6 +59,10 @@ public class PerfNode implements Serializable {
 
 	public String getName() {
 		return path.getName();
+	}
+
+	public NodeType getType() {
+		return path.getType();
 	}
 
 	public boolean isError() {

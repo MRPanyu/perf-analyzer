@@ -93,9 +93,14 @@
 	
 	<TreeTableView fx:id="treeTableNodes" showRoot="false" sortMode="ALL_DESCENDANTS" GridPane.columnIndex="1" GridPane.rowIndex="1">
 		<columns>
-			<TreeTableColumn fx:id="treeTableColumnName" text="方法名" prefWidth="500">
+			<TreeTableColumn fx:id="treeTableColumnName" text="名称" prefWidth="500">
 				<cellValueFactory>
 					<TreeItemPropertyValueFactory property="name" />
+				</cellValueFactory>
+			</TreeTableColumn>
+			<TreeTableColumn text="类型">
+				<cellValueFactory>
+					<TreeItemPropertyValueFactory property="type" />
 				</cellValueFactory>
 			</TreeTableColumn>
 			<TreeTableColumn text="执行次数">

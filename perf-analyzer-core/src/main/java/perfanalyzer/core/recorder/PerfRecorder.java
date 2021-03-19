@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 
 import perfanalyzer.core.io.PerfIO;
 import perfanalyzer.core.io.PerfIOFileImpl;
+import perfanalyzer.core.model.NodeType;
 import perfanalyzer.core.model.PerfNode;
 import perfanalyzer.core.model.PerfStatisticsGroup;
 import perfanalyzer.core.model.PerfStatisticsNode;
@@ -38,9 +39,19 @@ public class PerfRecorder {
 	 * @param name 程序块的名称
 	 */
 	public static void start(String name) {
+		start(name, NodeType.METHOD);
+	}
+
+	/**
+	 * 某个程序块执行前调用
+	 * 
+	 * @param name 程序块的名称
+	 * @param type 程序块类型
+	 */
+	public static void start(String name, NodeType type) {
 		// 类似于堆栈中压入当前执行块的操作
 		PerfNode parent = nodeStorage.get();
-		PerfNode node = new PerfNode(name, System.nanoTime(), parent);
+		PerfNode node = new PerfNode(name, type, System.nanoTime(), parent);
 		nodeStorage.set(node);
 		if (parent == null) {
 			PerfStatisticsGroup statisticsGroup = new PerfStatisticsGroup();
@@ -62,26 +73,30 @@ public class PerfRecorder {
 
 		// 获取父节点
 		PerfNode parent = node.getParent();
-		if (parent != null) {
+		if (parent != null && parent.getType() == NodeType.METHOD) {
 			// 累加父节点中的子节点耗时信息
+			// 如果父节点不是METHOD类型，子节点本身不会记录，因此也不累加子节点耗时
 			parent.addChildrenUseTime(node.getUseTimeNano());
 		}
 		// 当前节点设置为父节点
 		nodeStorage.set(parent);
 
 		// 异步执行（避免影响性能）合并到统计信息里面
-		executorService.submit(new Runnable() {
-			@Override
-			public void run() {
-				// 本节点本身要计入当前统计信息
-				PerfStatisticsNode perfStatisticsNode = perfStatisticsGroup.getOrCreateNode(node.getPath());
-				perfStatisticsNode.mergeNode(node);
-				// 如果已经回到顶层节点，则汇总到当前一分钟的组里面
-				if (node.getParent() == null) {
-					mergeStatisticsTimedGroup(perfStatisticsGroup);
+		if ((parent == null && node.getType() == NodeType.METHOD) || parent.getType() == NodeType.METHOD) {
+			// 注：父节点非空或者非METHOD的，不进行累加，避免SQL执行内部又出现其他执行节点的情况
+			executorService.submit(new Runnable() {
+				@Override
+				public void run() {
+					// 本节点本身要计入当前统计信息
+					PerfStatisticsNode perfStatisticsNode = perfStatisticsGroup.getOrCreateNode(node.getPath());
+					perfStatisticsNode.mergeNode(node);
+					// 如果已经回到顶层节点，则汇总到当前一分钟的组里面
+					if (node.getParent() == null) {
+						mergeStatisticsTimedGroup(perfStatisticsGroup);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	/** 将当前线程已完成的根节点信息汇总到统计信息当中 */
