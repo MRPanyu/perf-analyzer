@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class PerfStatisticsGroup implements Serializable {
 
-	private static final long serialVersionUID = 2222197306369221370L;
+	private static final long serialVersionUID = 9056386067001959767L;
 
 	/** 组内所有根节点代码块的统计数据 */
 	private List<PerfStatisticsNode> rootNodes = new ArrayList<PerfStatisticsNode>();

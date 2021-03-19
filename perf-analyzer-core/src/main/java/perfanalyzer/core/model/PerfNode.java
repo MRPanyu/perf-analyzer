@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 public class PerfNode implements Serializable {
 
-	private static final long serialVersionUID = 1720531900775676271L;
+	private static final long serialVersionUID = -6594351414457709198L;
 
 	public static final String PATH_SEPARATOR = "/";
 

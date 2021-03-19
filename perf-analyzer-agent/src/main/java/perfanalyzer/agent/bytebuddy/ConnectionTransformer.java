@@ -15,7 +15,7 @@ public class ConnectionTransformer implements Transformer {
 	@Override
 	public Builder<?> transform(Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader,
 			JavaModule module) {
-		String[] names = new String[] { "createStatement", "prepareStatement", "prepareCall" };
+		String[] names = new String[] { "prepareStatement", "prepareCall" };
 		return builder.method(namedOneOf(names).and(not(isAbstract())))
 				.intercept(MethodDelegation.to(ConnectionDelegation.class));
 	}

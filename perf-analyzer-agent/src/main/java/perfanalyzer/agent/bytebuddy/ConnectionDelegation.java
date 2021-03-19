@@ -22,10 +22,8 @@ public class ConnectionDelegation {
 			@SuperCall Callable<PreparedStatement> superCall, @This Object thisObj) throws SQLException {
 		try {
 			PreparedStatement ps = superCall.call();
-			if (SupportObject.hasSupportObject(thisObj)) {
-				SupportObject s = SupportObject.createSupportObject(ps);
-				s.setSql(sql);
-			}
+			SupportObject s = SupportObject.createSupportObject(ps);
+			s.setSql(sql);
 			return ps;
 		} catch (Throwable e) {
 			return rethrowException(e);
@@ -36,10 +34,8 @@ public class ConnectionDelegation {
 			@SuperCall Callable<CallableStatement> superCall, @This Object thisObj) throws SQLException {
 		try {
 			CallableStatement ps = superCall.call();
-			if (SupportObject.hasSupportObject(thisObj)) {
-				SupportObject s = SupportObject.createSupportObject(ps);
-				s.setSql(sql);
-			}
+			SupportObject s = SupportObject.createSupportObject(ps);
+			s.setSql(sql);
 			return ps;
 		} catch (Throwable e) {
 			return rethrowException(e);

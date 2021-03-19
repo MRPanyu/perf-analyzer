@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class PerfStatisticsNode implements Serializable {
 
-	private static final long serialVersionUID = -7876077102960270051L;
+	private static final long serialVersionUID = -2116147105154380761L;
 
 	private static long safeDivide(long a, long b) {
 		if (b == 0) {
@@ -107,6 +107,10 @@ public class PerfStatisticsNode implements Serializable {
 
 	public String getName() {
 		return path.getName();
+	}
+
+	public NodeType getType() {
+		return path.getType();
 	}
 
 	public NodePath getPath() {

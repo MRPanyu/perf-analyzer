@@ -2,6 +2,7 @@ package perfanalyzer.ui;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InvalidClassException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -140,6 +141,9 @@ public class RootController {
 			if (file != null) {
 				loadData(file);
 			}
+		} catch (InvalidClassException e) {
+			e.printStackTrace();
+			showAlert(AlertType.ERROR, "读取文件格式不兼容，可能时以前版本perf-analyzer-agent产生的文件");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

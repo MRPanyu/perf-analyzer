@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class NodePath implements Serializable {
 
-	private static final long serialVersionUID = -4458084428890672515L;
+	private static final long serialVersionUID = -4919739999103858392L;
 
 	private static Map<NodePath, NodePath> instanceMap = new HashMap<NodePath, NodePath>();
 
