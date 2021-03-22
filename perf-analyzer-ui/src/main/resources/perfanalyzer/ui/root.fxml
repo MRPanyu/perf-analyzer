@@ -52,7 +52,15 @@
 		</ToolBar>
 
 		<ToolBar fx:id="toolBarSpacer">
-			<TextField visible="false" prefWidth="0"></TextField>
+			<Button text="占位用按钮不显示" visible="false" prefWidth="0">
+				<graphic>
+					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+						<image>
+							<Image url="/perfanalyzer/ui/open.png" />
+						</image>
+					</ImageView>
+				</graphic>
+			</Button>
 		</ToolBar>
 
 		<ToolBar>

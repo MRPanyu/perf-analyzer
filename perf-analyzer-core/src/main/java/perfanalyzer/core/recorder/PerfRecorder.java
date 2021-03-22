@@ -82,8 +82,10 @@ public class PerfRecorder {
 		nodeStorage.set(parent);
 
 		// 异步执行（避免影响性能）合并到统计信息里面
-		if ((parent == null && node.getType() == NodeType.METHOD) || parent.getType() == NodeType.METHOD) {
-			// 注：父节点非空或者非METHOD的，不进行累加，避免SQL执行内部又出现其他执行节点的情况
+		if ((parent == null && node.getType() == NodeType.METHOD)
+				|| (parent != null && parent.getType() == NodeType.METHOD)) {
+			// 注：根节点仅METHOD类型的做记录，非根节点的，如果父节点不是METHOD类型也不记录
+			// 避免与要拦截方法无关的其他SQL被记录下来，另外避免SQL节点嵌套SQL节点。
 			executorService.submit(new Runnable() {
 				@Override
 				public void run() {
