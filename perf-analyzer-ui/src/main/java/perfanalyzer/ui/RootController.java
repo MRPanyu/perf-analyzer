@@ -34,12 +34,16 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -58,6 +62,10 @@ import perfanalyzer.ui.export.ExcelExporter;
  *
  */
 public class RootController {
+
+	protected static Color[] bgColors = { Color.web("#E7B9C0"), Color.web("#FBCFD0"), Color.web("#FFE5D4"),
+			Color.web("#FFFCCC"), Color.web("#C8EFD4"), Color.web("#C8EBFA"), Color.web("#D3D5F5"),
+			Color.web("#EDD3ED") };
 
 	@FXML
 	protected GridPane root;
@@ -118,11 +126,29 @@ public class RootController {
 								if (t == null) {
 									setTooltip(null);
 									setText(null);
+									setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
+									setTextFill(Color.BLACK);
 								} else {
 									Tooltip tooltip = new Tooltip();
 									tooltip.setText(t.toString());
 									setTooltip(tooltip);
 									setText(t.toString());
+									PerfStatisticsNode node = getTreeTableRow().getItem();
+									if (node == null) {
+										setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
+										setTextFill(Color.BLACK);
+									} else {
+										NodePath path = node.getPath();
+										int level = 0;
+										while (path.getParentPath() != null) {
+											level++;
+											path = path.getParentPath();
+										}
+										int levelColor = level % bgColors.length;
+										setBackground(
+												new Background(new BackgroundFill(bgColors[levelColor], null, null)));
+										setTextFill(Color.BLACK);
+									}
 								}
 							}
 						};
