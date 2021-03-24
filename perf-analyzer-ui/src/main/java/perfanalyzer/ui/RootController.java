@@ -34,16 +34,12 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -63,9 +59,8 @@ import perfanalyzer.ui.export.ExcelExporter;
  */
 public class RootController {
 
-	protected static Color[] bgColors = { Color.web("#E7B9C0"), Color.web("#FBCFD0"), Color.web("#FFE5D4"),
-			Color.web("#FFFCCC"), Color.web("#C8EFD4"), Color.web("#C8EBFA"), Color.web("#D3D5F5"),
-			Color.web("#EDD3ED") };
+	protected static String[] levelColors = { "#880015", "#ED1C24", "#FF7F27", "#FFF200", "#22B14C", "#00A2E8",
+			"#3F48CC", "#A349A4" };
 
 	@FXML
 	protected GridPane root;
@@ -126,8 +121,8 @@ public class RootController {
 								if (t == null) {
 									setTooltip(null);
 									setText(null);
-									setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
-									setTextFill(Color.BLACK);
+									setStyle(
+											"-fx-border-color: white; -fx-border-width: 0 0 0 6; -fx-padding: 0 0 0 -6");
 								} else {
 									Tooltip tooltip = new Tooltip();
 									tooltip.setText(t.toString());
@@ -135,8 +130,8 @@ public class RootController {
 									setText(t.toString());
 									PerfStatisticsNode node = getTreeTableRow().getItem();
 									if (node == null) {
-										setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
-										setTextFill(Color.BLACK);
+										setStyle(
+												"-fx-border-color: white; -fx-border-width: 0 0 0 6; -fx-padding: 0 0 0 -6");
 									} else {
 										NodePath path = node.getPath();
 										int level = 0;
@@ -144,10 +139,10 @@ public class RootController {
 											level++;
 											path = path.getParentPath();
 										}
-										int levelColor = level % bgColors.length;
-										setBackground(
-												new Background(new BackgroundFill(bgColors[levelColor], null, null)));
-										setTextFill(Color.BLACK);
+										int lv = level % levelColors.length;
+										String levelColor = levelColors[lv];
+										setStyle("-fx-border-color: " + levelColor
+												+ "; -fx-border-width: 0 0 0 6; -fx-padding: 0 0 0 -6");
 									}
 								}
 							}

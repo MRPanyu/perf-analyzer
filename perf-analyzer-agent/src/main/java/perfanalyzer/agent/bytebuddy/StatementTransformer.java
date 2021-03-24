@@ -15,7 +15,7 @@ public class StatementTransformer implements Transformer {
 	@Override
 	public Builder<?> transform(Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader,
 			JavaModule module) {
-		String[] names = new String[] { "execute", "executeQuery", "executeUpdate" };
+		String[] names = new String[] { "execute", "executeQuery", "executeUpdate", "addBatch", "executeBatch" };
 		return builder.method(namedOneOf(names).and(not(isAbstract())))
 				.intercept(MethodDelegation.to(StatementDelegation.class));
 	}

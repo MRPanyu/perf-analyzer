@@ -38,6 +38,7 @@ public class SupportObject implements Serializable {
 	}
 
 	private String sql;
+	private int batchCount = 0;
 
 	public String getSql() {
 		return sql;
@@ -45,6 +46,18 @@ public class SupportObject implements Serializable {
 
 	public void setSql(String sql) {
 		this.sql = sql;
+	}
+
+	public int getBatchCount() {
+		return batchCount;
+	}
+
+	public void setBatchCount(int batchCount) {
+		this.batchCount = batchCount;
+	}
+
+	public void incrementBatchCount() {
+		this.batchCount++;
 	}
 
 }

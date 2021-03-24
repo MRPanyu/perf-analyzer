@@ -64,6 +64,32 @@ public class StatementDelegation {
 		}
 	}
 
+	public static void addBatch(@Argument(0) String sql, @SuperCall Callable<Object> superCall, @This Object thisObj)
+			throws SQLException {
+		SupportObject s = SupportObject.createSupportObject(thisObj);
+		s.incrementBatchCount();
+		try {
+			superCall.call();
+		} catch (Throwable e) {
+			rethrowException(e);
+		}
+	}
+
+	public static int[] executeBatch(@SuperCall Callable<int[]> superCall, @This Object thisObj) throws SQLException {
+		SupportObject s = SupportObject.createSupportObject(thisObj);
+		String name = sqlToName(s.getSql(), s.getBatchCount());
+		s.setBatchCount(0);
+		try {
+			PerfRecorder.start(name, NodeType.SQL);
+			int[] returnVal = superCall.call();
+			PerfRecorder.end(false);
+			return returnVal;
+		} catch (Throwable e) {
+			PerfRecorder.end(true);
+			return rethrowException(e);
+		}
+	}
+
 	/* java.sql.PreparedStatement/java.sql.CallableStatement 相关方法 */
 
 	public static ResultSet executeQuery(@SuperCall Callable<ResultSet> superCall, @This Object thisObj)
@@ -127,8 +153,25 @@ public class StatementDelegation {
 		}
 	}
 
+	public static void addBatch(@SuperCall Callable<Object> superCall, @This Object thisObj) throws SQLException {
+		SupportObject s = SupportObject.createSupportObject(thisObj);
+		s.incrementBatchCount();
+		try {
+			superCall.call();
+		} catch (Throwable e) {
+			rethrowException(e);
+		}
+	}
+
 	private static String sqlToName(String sql) {
 		return new StringBuilder("[SQL]{").append(sql).append("}").toString();
+	}
+
+	private static String sqlToName(String sql, int batchCount) {
+		if (sql == null) {
+			sql = "<not_recorded>";
+		}
+		return new StringBuilder("[SQL_BATCH(").append(batchCount).append(")]{").append(sql).append("}").toString();
 	}
 
 	private static <T> T rethrowException(Throwable e) throws SQLException {
