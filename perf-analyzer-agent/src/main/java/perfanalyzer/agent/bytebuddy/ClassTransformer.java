@@ -3,6 +3,7 @@ package perfanalyzer.agent.bytebuddy;
 import static net.bytebuddy.matcher.ElementMatchers.isAbstract;
 import static net.bytebuddy.matcher.ElementMatchers.isStatic;
 import static net.bytebuddy.matcher.ElementMatchers.isDefaultMethod;
+import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
 import java.security.ProtectionDomain;
@@ -31,12 +32,12 @@ public class ClassTransformer implements Transformer {
 	public Builder<?> transform(Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader,
 			JavaModule module, ProtectionDomain protectionDomain) {
 		builder = builder
-				.method(new NameMatcher<NamedElement>(methodNameMatcher).and(not(isAbstract()))
-						.and(not(isDefaultMethod())).and(isStatic()))
+				.method(new NameMatcher<NamedElement>(methodNameMatcher).and(isDeclaredBy(typeDescription))
+						.and(not(isAbstract())).and(not(isDefaultMethod())).and(isStatic()))
 				.intercept(Advice.to(PerfRecordStaticMethodAdvice.class));
 		builder = builder
-				.method(new NameMatcher<NamedElement>(methodNameMatcher).and(not(isAbstract()))
-						.and(not(isDefaultMethod())).and(not(isStatic())))
+				.method(new NameMatcher<NamedElement>(methodNameMatcher).and(isDeclaredBy(typeDescription))
+						.and(not(isAbstract())).and(not(isDefaultMethod())).and(not(isStatic())))
 				.intercept(Advice.to(PerfRecordInstanceMethodAdvice.class));
 		return builder;
 	}
