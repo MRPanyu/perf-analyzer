@@ -361,13 +361,11 @@ public class RootController {
 			NodePath rootPath = NodePath.getInstance("_root", NodeType.METHOD, null); // 虚拟根节点方便显示
 			PerfStatisticsNode root = new PerfStatisticsNode(rootPath);
 			TreeItem<PerfStatisticsNode> rootItem = new TreeItem<PerfStatisticsNode>(root);
-			for (PerfStatisticsNode node : selectedGroup.getRootNodes()) {
-				if (filter != null && filter.length() > 0) {
-					String name = node.getName();
-					if (!name.contains(filter)) {
-						continue;
-					}
-				}
+			List<PerfStatisticsNode> foundNodes = new ArrayList<>();
+			for (PerfStatisticsNode rootNode : selectedGroup.getRootNodes()) {
+				foundNodes.addAll(rootNode.find(filter));
+			}
+			for (PerfStatisticsNode node : foundNodes) {
 				buildTree(rootItem, node);
 			}
 			treeTableNodes.setRoot(rootItem);

@@ -44,12 +44,22 @@ public class PerfAgentConfig implements Serializable {
 		return instance;
 	}
 
+	/** 是否输出System.out调试信息 */
+	private Boolean verbose = false;
 	/** 输出性能数据的文件，注意如果是相对路径格式，相对的是程序启动的路径而不是agent jar包的路径 */
 	private String outputFile;
 	/** 是否记录SQL性能 */
 	private Boolean recordSql;
 	/** 拦截进行性能记录的切面 */
 	private List<PerfAgentAspectConfig> aspects = new ArrayList<PerfAgentAspectConfig>();
+
+	public Boolean getVerbose() {
+		return verbose;
+	}
+
+	public void setVerbose(Boolean verbose) {
+		this.verbose = verbose;
+	}
 
 	public String getOutputFile() {
 		return outputFile;

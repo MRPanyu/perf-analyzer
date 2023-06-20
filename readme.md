@@ -26,10 +26,13 @@ perf-analyzer-ui.jar 则是给开发人员本机使用的，目前支持Java 8�
 在 perf-analyzer-agent.jar 同一个目录下，新建一个 perf-analyzer-agent.yml 文件，内容示例如下：
 
 ```yaml
+# 是否在System.out输出增强的调试信息
+verbose: false
+
 # 输出性能数据的文件，注意如果是相对路径，是相对于程序启动目录，而不是agent jar包的位置
 outputFile: "./perf_record.prec"
 
-# 是否拦截记录SQL执行性能
+# 是否拦截记录SQL执行性能，会在JDBC层（Connection, Statement, PreparedStatement等）埋点
 recordSql: true
 
 # 拦截切面，可配置多个
@@ -38,13 +41,13 @@ aspects:
     # 类名中的通配符：一个*匹配单层包名或类名，两个**通配符则包含子包。
     # 例：com.example.* 表示 com.example 单个包下的所有类
     # 例：com.example.** 表示 com.example 包以及所有子包下的所有类
-  - includeClasses: "com.example.**"
+  - includeClasses: "com.example.**;cn.com.example.**"
     # 排除的类名，可用*通配，可多个分号隔开
-    excludeClasses: "com.example.**po.*;com.example.**vo.*"
+    excludeClasses: "**.po.**;**.vo.**;**.dto.**;**$$EnhancerBySpringCGLIB$$**;**$$FastClassBySpringCGLIB$$**"
     # 包含的方法名，可用*通配，可多个分号隔开
     includeMethods: "*"
     # 排除的方法名，可用*通配，可多个分号隔开
-    excludeMethods: "hashCode;equals"
+    excludeMethods: "hashCode;equals;toString;clone"
 ```
 
 需要进行性能监控拦截的类名/方法名请根据要监控系统的实际情况进行修改。注意aspects节点是一个yaml列表格式，如果单一个include/exclude满足不了具体要求可以配多个的。

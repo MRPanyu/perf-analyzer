@@ -82,7 +82,7 @@
 					</ImageView>
 				</graphic>
 			</Button>
-			<Label text="过滤根节点">
+			<Label text="查找">
 				<graphic>
 					<ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
 						<image>

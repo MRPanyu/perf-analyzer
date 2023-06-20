@@ -205,6 +205,18 @@ public class PerfStatisticsNode implements Serializable {
 		this.children = children;
 	}
 
+	public List<PerfStatisticsNode> find(String text) {
+		List<PerfStatisticsNode> nodes = new ArrayList<>();
+		if (text == null || text.trim().length() == 0 || this.path.getName().contains(text)) {
+			nodes.add(this);
+		} else if (children != null) {
+			for (PerfStatisticsNode child : children) {
+				nodes.addAll(child.find(text));
+			}
+		}
+		return nodes;
+	}
+
 	public long getExecuteCount() {
 		return this.successCount + this.errorCount;
 	}

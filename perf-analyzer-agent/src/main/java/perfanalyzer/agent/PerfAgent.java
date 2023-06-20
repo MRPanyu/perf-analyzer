@@ -17,9 +17,9 @@ import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.NameMatcher;
 import perfanalyzer.agent.bytebuddy.ClassNameMatcher;
 import perfanalyzer.agent.bytebuddy.ClassTransformer;
-import perfanalyzer.agent.bytebuddy.ConnectionTransformer;
 import perfanalyzer.agent.bytebuddy.ExcludeClassNameMatcher;
-import perfanalyzer.agent.bytebuddy.StatementTransformer;
+import perfanalyzer.agent.bytebuddy.jdbc.ConnectionTransformer;
+import perfanalyzer.agent.bytebuddy.jdbc.StatementTransformer;
 import perfanalyzer.agent.config.PerfAgentAspectConfig;
 import perfanalyzer.agent.config.PerfAgentConfig;
 import perfanalyzer.core.io.PerfIOFileImpl;
@@ -41,9 +41,12 @@ public class PerfAgent {
 
 		// 创建默认增强配置
 		ByteBuddy byteBuddy = new ByteBuddy().with(TypeValidation.DISABLED);
-		AgentBuilder agentBuilder = AgentBuilder.Default.of().with(byteBuddy)
-				// 类增强的调试信息输出到System.out，如果不需要可以注释掉
-				.with(new AgentBuilder.Listener.StreamWriting(System.out).withTransformationsOnly());
+		AgentBuilder agentBuilder = AgentBuilder.Default.of().with(byteBuddy);
+		if (config.getVerbose() != null && config.getVerbose().booleanValue()) {
+			// 类增强的调试信息输出到System.out
+			agentBuilder = agentBuilder
+					.with(new AgentBuilder.Listener.StreamWriting(System.out).withTransformationsOnly());
+		}
 
 		// 根据逐个切面配置设置增强的类与方法
 		for (PerfAgentAspectConfig aspectConfig : config.getAspects()) {
@@ -53,7 +56,7 @@ public class PerfAgent {
 			NameMatcher<NamedElement> excludeNameMatcher = new NameMatcher<NamedElement>(excludeClassNameMatcher);
 			// 类名的匹配规则：类名本身符合匹配规则的，或者某个类有父类或实现接口是符合匹配规则的，且这个类名本身不属于排除列表的
 			// 后面那种匹配情况主要是想拦截到一些如MyBatis/spring-data之类自动生成的DAO动态实现类
-			agentBuilder = agentBuilder.type(nameMatcher.or(hasSuperType(nameMatcher).and(not(excludeNameMatcher))))
+			agentBuilder = agentBuilder.type((nameMatcher.or(hasSuperType(nameMatcher))).and(not(excludeNameMatcher)))
 					.transform(new ClassTransformer(aspectConfig));
 		}
 
