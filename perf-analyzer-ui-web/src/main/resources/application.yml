@@ -1,0 +1,7 @@
+server:
+  port: 8990
+  servlet.context-path: /
+
+perf:
+  record-files:
+    - './perf_record.prec'

@@ -12,6 +12,7 @@
 		<module>perf-analyzer-core</module>
 		<module>perf-analyzer-agent</module>
 		<module>perf-analyzer-ui</module>
+		<module>perf-analyzer-ui-web</module>
 	</modules>
 
 	<properties>
