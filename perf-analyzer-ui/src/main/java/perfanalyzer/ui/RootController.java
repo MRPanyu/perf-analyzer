@@ -3,7 +3,6 @@ package perfanalyzer.ui;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InvalidClassException;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +43,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import perfanalyzer.core.io.PerfIOFileImpl;
+import perfanalyzer.core.io.FilePerfInput;
 import perfanalyzer.core.model.NodePath;
 import perfanalyzer.core.model.NodeType;
 import perfanalyzer.core.model.PerfStatisticsNode;
@@ -308,14 +307,8 @@ public class RootController {
 
 	public void loadData(File file) throws Exception {
 		Stage stage = (Stage) root.getScene().getWindow();
-		PerfIOFileImpl perfIO = new PerfIOFileImpl(file);
-		List<Serializable> allItems = perfIO.loadAll();
-		groups = new ArrayList<PerfStatisticsTimedGroup>();
-		for (Serializable item : allItems) {
-			if (item instanceof PerfStatisticsTimedGroup) {
-				groups.add((PerfStatisticsTimedGroup) item);
-			}
-		}
+		FilePerfInput input = new FilePerfInput(file);
+		groups = input.readAll();
 		if (groups != null && !groups.isEmpty()) {
 			stage.setTitle(PerfAnalyzerUIApplication.DEFAULT_TITLE + " - " + file.getCanonicalPath());
 			renderListViewGroups();

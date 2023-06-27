@@ -1,20 +1,22 @@
 package perfanalyzer.web;
 
 import java.io.File;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import perfanalyzer.core.io.PerfIOFileImpl;
+import perfanalyzer.core.io.FilePerfInput;
+import perfanalyzer.core.io.PerfInput;
 import perfanalyzer.core.model.PerfStatisticsTimedGroup;
 
 @RestController
@@ -26,49 +28,64 @@ public class PerfAnalyzerController {
 	protected PerfAnalyzerProperties perfAnalyzerProperties;
 
 	@RequestMapping("/getRecordFiles")
-	public List<String> getRecordFiles() {
-		return perfAnalyzerProperties.getRecordFiles();
+	public LinkedHashMap<String, String> getRecordFiles() throws Exception {
+		List<String> recordFiles = perfAnalyzerProperties.getRecordFiles();
+		LinkedHashMap<String, String> map = new LinkedHashMap<>();
+		for (String recordFile : recordFiles) {
+			File f = new File(recordFile);
+			File[] farr = f.getParentFile().listFiles(ff -> {
+				return ff.getName().startsWith(f.getName());
+			});
+			for (File ff : farr) {
+				String path = ff.getCanonicalPath();
+				String key = DigestUtils.md5DigestAsHex(path.getBytes("UTF-8"));
+				map.put(key, path);
+			}
+		}
+		return map;
 	}
 
 	@RequestMapping("/getTimeGroups")
-	public List<String> getTimeGroups(@RequestParam("fileIdx") int fileIdx) {
-		List<Serializable> allItems = loadAllGroups(fileIdx);
-		List<String> groups = new ArrayList<String>();
-		for (Serializable item : allItems) {
-			if (item instanceof PerfStatisticsTimedGroup) {
-				PerfStatisticsTimedGroup g = (PerfStatisticsTimedGroup) item;
-				String gs = timeStr(g.getStatisticsStartTime());
-				groups.add(gs);
-			}
+	public List<String> getTimeGroups(@RequestParam("fileKey") String fileKey) throws Exception {
+		PerfInput input = getInput(fileKey);
+		if (input == null) {
+			return Collections.emptyList();
 		}
-		return groups;
+		List<PerfStatisticsTimedGroup> groups = input.readHeads();
+		List<String> names = new ArrayList<String>();
+		for (PerfStatisticsTimedGroup group : groups) {
+			String name = timeStr(group.getStatisticsStartTime());
+			names.add(name);
+		}
+		return names;
 	}
 
 	@RequestMapping("/getGroupData")
-	public PerfStatisticsTimedGroup getGroupData(@RequestParam("fileIdx") int fileIdx,
-			@RequestParam("groupIdx") int groupIdx) {
-		List<Serializable> allItems = loadAllGroups(fileIdx);
-		if (groupIdx >= allItems.size()) {
+	public PerfStatisticsTimedGroup getGroupData(@RequestParam("fileKey") String fileKey,
+			@RequestParam("groupIdx") int groupIdx) throws Exception {
+		PerfInput input = getInput(fileKey);
+		if (input == null) {
 			return null;
 		} else {
-			PerfStatisticsTimedGroup g = (PerfStatisticsTimedGroup) allItems.get(groupIdx);
-			return g;
+			return input.read(groupIdx);
 		}
 	}
 
-	private List<Serializable> loadAllGroups(int fileIdx) {
-		String file = perfAnalyzerProperties.getRecordFiles().get(fileIdx);
+	private PerfInput getInput(String fileKey) throws Exception {
+		String file = getRecordFiles().get(fileKey);
+		if (file == null) {
+			return null;
+		}
 		File f = new File(file);
 		if (!f.exists()) {
-			return Collections.emptyList();
+			return null;
 		}
-		PerfIOFileImpl perfIO = new PerfIOFileImpl(f);
-		List<Serializable> allItems = perfIO.loadAll();
-		return allItems;
+		FilePerfInput input = new FilePerfInput(f);
+		return input;
 	}
 
 	private String timeStr(long d) {
-		SimpleDateFormat fmt = new SimpleDateFormat("HH:mm");
+		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		return fmt.format(d);
 	}
 

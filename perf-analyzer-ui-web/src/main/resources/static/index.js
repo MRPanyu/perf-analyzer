@@ -1,5 +1,5 @@
 var model = {
-	fileIdx: null,
+	fileKey: null,
 	groupIdx: null,
 	rootNodes: [],
 	search: ''
@@ -10,6 +10,8 @@ $(function() {
 	layui.use(function(){
 		var form = layui.form;
 		form.render();
+		
+		// events
 		form.on('select(fileSelect)', function(data) {
 			onFileSelect(data.value);
 		});
@@ -18,6 +20,17 @@ $(function() {
 		});
 		$('#search').change(onSearch);
 		$('#search + .layui-input-affix .layui-icon-clear').click(onSearch);
+		$('#btnExpandAll').click(function() { layui.treeTable.expandAll('treeTable', true); });
+		$('#btnCollapseAll').click(function() { layui.treeTable.expandAll('treeTable', false); });
+		$('#btnHelp').click(function() {
+			var html = $("#helpContent").html();
+			layui.layer.open({
+				type: 1,
+				area: ['500px', '300px'],
+				content: html
+			});
+		});
+		
 		renderTreeTable();
 	});
 });
@@ -27,12 +40,12 @@ function loadRecordFiles() {
 		url: 'getRecordFiles',
 		type: 'post',
 		dataType: 'json',
-		success: function(files) {
+		success: function(map) {
 			var fileSelect = $("#fileSelect").get(0);
 			fileSelect.options.length = 1;
-			for (var i = 0; i < files.length; i++) {
-				var f = files[i];
-				var option = new Option(f, '' + i);
+			for (var key in map) {
+				var path = map[key];
+				var option = new Option(path, key);
 				fileSelect.options.add(option);
 			}
 			layui.form.render('select');
@@ -41,7 +54,7 @@ function loadRecordFiles() {
 }
 
 function onFileSelect(value) {
-	model.fileIdx = value;
+	model.fileKey = value;
 	if (value === '') {
 		var groupSelect = $("#groupSelect").get(0);
 		groupSelect.options.length = 1;
@@ -51,7 +64,7 @@ function onFileSelect(value) {
 		$.ajax({
 			url: 'getTimeGroups',
 			type: 'post',
-			data: { fileIdx: model.fileIdx },
+			data: { fileKey: model.fileKey },
 			dataType: 'json',
 			success: function(groups) {
 				var groupSelect = $("#groupSelect").get(0);
@@ -77,11 +90,11 @@ function onGroupSelect(value) {
 		$.ajax({
 			url: 'getGroupData',
 			type: 'post',
-			data: { fileIdx: model.fileIdx, groupIdx: model.groupIdx },
+			data: { fileKey: model.fileKey, groupIdx: model.groupIdx },
 			dataType: 'json',
 			success: function(groupData) {
 				if (groupData == null) {
-					alert("Error");
+					layui.layer.msg("Error");
 				} else {
 					model.rootNodes = groupData.rootNodes;
 					renderTreeTable();
@@ -155,4 +168,3 @@ function renderTreeTable() {
 		height: 'full-62'
 	});
 }
-

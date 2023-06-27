@@ -39,12 +39,31 @@
 			</ul>
 			<ul class="layui-nav layui-layout-right">
 				<li class="nav-item">
-					<!-- No content yet -->
+					<div class="layui-btn-group">
+						<button id="btnExpandAll" type="button" class="layui-btn">
+							<i class="layui-icon layui-icon-down layui-font-12"></i>全部展开
+						</button><button id="btnCollapseAll" type="button" class="layui-btn">
+							<i class="layui-icon layui-icon-up layui-font-12"></i>全部收起
+						</button>
+					</div>
+					<button id="btnHelp" type="button" class="layui-btn layui-btn-normal">
+						<i class="layui-icon layui-icon-about layui-font-12"></i>Help
+					</button>
 				</li>
 			</ul>
 		</div>
 		<div class="layui-body" style="left:0px">
 			<table class="layui-hide" id="treeTable"></table>
+		</div>
+		<div id="helpContent" style="display:none">
+			<div class="layui-text" style="padding: 10px;">
+				<ul>
+					<li>选择文件/时间后下方表格展示性能分析数据。</li>
+					<li>可通过筛选输入框查找关注的内容，如某个具体Controller类名。筛选出的顶层节点下的子节点是完整展示的。</li>
+					<li>点击列头可排序。</li>
+					<li>包含X的列表示这个节点自身，排除下方子节点外的性能消耗。</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 	

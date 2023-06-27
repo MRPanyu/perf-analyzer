@@ -5,8 +5,8 @@ import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import perfanalyzer.core.io.PerfIO;
-import perfanalyzer.core.io.PerfIOFileImpl;
+import perfanalyzer.core.io.FilePerfOutput;
+import perfanalyzer.core.io.PerfOutput;
 import perfanalyzer.core.model.NodeType;
 import perfanalyzer.core.model.PerfNode;
 import perfanalyzer.core.model.PerfStatisticsGroup;
@@ -22,7 +22,7 @@ import perfanalyzer.core.model.PerfStatisticsTimedGroup;
 public class PerfRecorder {
 
 	/** 输出性能日志的默认IO，默认是输出到启动目录下的perf_record.data文件中，可以初始化时改成其他实现 */
-	public static PerfIO perfIO = new PerfIOFileImpl(new File("perf_record.prec"));
+	private static PerfOutput output = new FilePerfOutput(new File("perf_record.prec"));
 
 	/** 用于执行异步任务的线程池 */
 	private static ExecutorService executorService = Executors.newCachedThreadPool();
@@ -32,6 +32,10 @@ public class PerfRecorder {
 	private static ThreadLocal<PerfNode> nodeStorage = new ThreadLocal<PerfNode>();
 	/** 汇总当前线程中执行信息的临时统计组，在根节点执行完成后再汇总到当前一分钟的统计组中 */
 	private static ThreadLocal<PerfStatisticsGroup> statisticsGroupStorage = new ThreadLocal<PerfStatisticsGroup>();
+
+	public static void setOutput(PerfOutput o) {
+		output = o;
+	}
 
 	/**
 	 * 某个程序块执行前调用
@@ -133,7 +137,7 @@ public class PerfRecorder {
 	}
 
 	/** 统计组信息写入文件 */
-	private static void writeStatisticsTimedGroup(final PerfStatisticsGroup group) {
+	private static void writeStatisticsTimedGroup(final PerfStatisticsTimedGroup group) {
 		executorService.submit(new Runnable() {
 			@Override
 			public void run() {
@@ -141,7 +145,7 @@ public class PerfRecorder {
 					// 休眠1秒，尽量保证切换间隔mergeStatistics都完成
 					Thread.sleep(1000);
 					synchronized (group) {
-						perfIO.saveItem(group);
+						output.write(group);
 					}
 				} catch (Exception e) {
 				}

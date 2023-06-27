@@ -45,35 +45,35 @@ public class PerfAgentConfig implements Serializable {
 	}
 
 	/** 是否输出System.out调试信息 */
-	private Boolean verbose = false;
-	/** 输出性能数据的文件，注意如果是相对路径格式，相对的是程序启动的路径而不是agent jar包的路径 */
-	private String outputFile;
+	private boolean verbose = false;
+	/** 输出文件设置 */
+	private PerfAgentOutputConfig output = new PerfAgentOutputConfig();
 	/** 是否记录SQL性能 */
-	private Boolean recordSql;
+	private boolean recordSql = false;
 	/** 拦截进行性能记录的切面 */
 	private List<PerfAgentAspectConfig> aspects = new ArrayList<PerfAgentAspectConfig>();
 
-	public Boolean getVerbose() {
+	public boolean getVerbose() {
 		return verbose;
 	}
 
-	public void setVerbose(Boolean verbose) {
+	public void setVerbose(boolean verbose) {
 		this.verbose = verbose;
 	}
 
-	public String getOutputFile() {
-		return outputFile;
+	public PerfAgentOutputConfig getOutput() {
+		return output;
 	}
 
-	public void setOutputFile(String outputFile) {
-		this.outputFile = outputFile;
+	public void setOutput(PerfAgentOutputConfig output) {
+		this.output = output;
 	}
 
-	public Boolean getRecordSql() {
+	public boolean getRecordSql() {
 		return recordSql;
 	}
 
-	public void setRecordSql(Boolean recordSql) {
+	public void setRecordSql(boolean recordSql) {
 		this.recordSql = recordSql;
 	}
 

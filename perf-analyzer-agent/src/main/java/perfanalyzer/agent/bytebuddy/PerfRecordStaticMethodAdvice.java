@@ -30,7 +30,6 @@ public class PerfRecordStaticMethodAdvice {
 	@IgnoreForBinding
 	public static String methodName(String name) {
 		int beginIndex = 0;
-		int methodNameBeginIndex = 0;
 		int endIndex = 0;
 		boolean foundBeginBracket = false;
 		char[] carr = name.toCharArray();
@@ -44,10 +43,6 @@ public class PerfRecordStaticMethodAdvice {
 			} else if (c == ' ') {
 				if (!foundBeginBracket) {
 					beginIndex = i + 1;
-				}
-			} else if (c == '.') {
-				if (!foundBeginBracket) {
-					methodNameBeginIndex = i + 1;
 				}
 			}
 		}

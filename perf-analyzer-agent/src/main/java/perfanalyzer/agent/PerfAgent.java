@@ -5,7 +5,6 @@ import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 import static net.bytebuddy.matcher.ElementMatchers.isSubTypeOf;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
-import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -22,7 +21,9 @@ import perfanalyzer.agent.bytebuddy.jdbc.ConnectionTransformer;
 import perfanalyzer.agent.bytebuddy.jdbc.StatementTransformer;
 import perfanalyzer.agent.config.PerfAgentAspectConfig;
 import perfanalyzer.agent.config.PerfAgentConfig;
-import perfanalyzer.core.io.PerfIOFileImpl;
+import perfanalyzer.core.io.FilePerfOutput;
+import perfanalyzer.core.io.PerfOutput;
+import perfanalyzer.core.io.RollingFilePerfOutput;
 import perfanalyzer.core.recorder.PerfRecorder;
 
 /**
@@ -36,13 +37,20 @@ public class PerfAgent {
 	public static void premain(String options, Instrumentation inst) {
 		// 从perf-analyzer-agent.yml文件中读取配置信息
 		PerfAgentConfig config = PerfAgentConfig.getInstance();
+
 		// 根据配置信息调整输出文件
-		PerfRecorder.perfIO = new PerfIOFileImpl(new File(config.getOutputFile()));
+		PerfOutput output = null;
+		if (config.getOutput().isRolling()) {
+			output = new RollingFilePerfOutput(config.getOutput().getFile());
+		} else {
+			output = new FilePerfOutput(config.getOutput().getFile());
+		}
+		PerfRecorder.setOutput(output);
 
 		// 创建默认增强配置
 		ByteBuddy byteBuddy = new ByteBuddy().with(TypeValidation.DISABLED);
 		AgentBuilder agentBuilder = AgentBuilder.Default.of().with(byteBuddy);
-		if (config.getVerbose() != null && config.getVerbose().booleanValue()) {
+		if (config.getVerbose()) {
 			// 类增强的调试信息输出到System.out
 			agentBuilder = agentBuilder
 					.with(new AgentBuilder.Listener.StreamWriting(System.out).withTransformationsOnly());
@@ -61,7 +69,7 @@ public class PerfAgent {
 		}
 
 		// SQL拦截配置
-		if (config.getRecordSql() != null && config.getRecordSql().booleanValue()) {
+		if (config.getRecordSql()) {
 			agentBuilder = agentBuilder.type(isSubTypeOf(Connection.class).and(not(isInterface())))
 					.transform(new ConnectionTransformer()).type(isSubTypeOf(Statement.class).and(not(isInterface())))
 					.transform(new StatementTransformer());
